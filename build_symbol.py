@@ -2,7 +2,7 @@
 """Build self-contained symbol.html from symbol-template.html + symbol-data.json."""
 import json, os
 
-ROOT = '/Users/henry/tree-of-life'
+ROOT = '/Users/fathomers/workspace/tree-of-life'
 template = open(os.path.join(ROOT, 'symbol-template.html')).read()
 data = json.load(open(os.path.join(ROOT, 'symbol-data.json')))
 data_js = json.dumps(data, ensure_ascii=False).replace('</', '<\\/')
