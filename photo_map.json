@@ -1,0 +1,344 @@
+{
+ "garden-eden": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Ficus_carica_L%2C_1771.jpg/500px-Ficus_carica_L%2C_1771.jpg",
+  "source": "wikipedia",
+  "label": "Fig",
+  "title": "Ficus carica"
+ },
+ "gilgamesh-tree": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/View_from_the_Barouk_Forest_1.JPG/500px-View_from_the_Barouk_Forest_1.JPG",
+  "source": "wikipedia",
+  "label": "Cedrus",
+  "title": "Cedrus"
+ },
+ "sumerian-sacred-tree": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Dates005.jpg/500px-Dates005.jpg",
+  "source": "wikipedia",
+  "label": "Date palm",
+  "title": "Phoenix dactylifera"
+ },
+ "egypt-sycamore": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Ficus_sycomorus_0003.jpg/500px-Ficus_sycomorus_0003.jpg",
+  "source": "wikipedia",
+  "label": "Ficus sycomorus",
+  "title": "Ficus sycomorus"
+ },
+ "egypt-ba-tree": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/View_from_the_Barouk_Forest_1.JPG/500px-View_from_the_Barouk_Forest_1.JPG",
+  "source": "wikipedia",
+  "label": "Cedrus",
+  "title": "Cedrus"
+ },
+ "persian-ashoka": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Ashoka_Flower.jpg/500px-Ashoka_Flower.jpg",
+  "source": "wikipedia",
+  "label": "Saraca",
+  "title": "Saraca"
+ },
+ "yggdrasil": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Fraxinus_excelsior.jpg/330px-Fraxinus_excelsior.jpg",
+  "source": "wikipedia",
+  "label": "Fraxinus excelsior",
+  "title": "Fraxinus excelsior"
+ },
+ "celtic-oak-dagda": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Quercus_robur.jpg/330px-Quercus_robur.jpg",
+  "source": "wikipedia",
+  "label": "Oak",
+  "title": "Quercus"
+ },
+ "slavic-world-tree": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Quercus_robur.jpg/330px-Quercus_robur.jpg",
+  "source": "wikipedia",
+  "label": "Oak",
+  "title": "Quercus"
+ },
+ "greek-hesperides": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Pink_lady_and_cross_section.jpg/500px-Pink_lady_and_cross_section.jpg",
+  "source": "wikipedia",
+  "label": "Apple",
+  "title": "Malus domestica"
+ },
+ "greek-olive-athena": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/Olea_europaea_cuspidata-africana_Cape_Town.JPG/330px-Olea_europaea_cuspidata-africana_Cape_Town.JPG",
+  "source": "wikipedia",
+  "label": "Olea europaea",
+  "title": "Olea europaea"
+ },
+ "greek-dodona-oak": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Quercus_robur.jpg/330px-Quercus_robur.jpg",
+  "source": "wikipedia",
+  "label": "Oak",
+  "title": "Quercus"
+ },
+ "kalpavriksha": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/Great_banyan_tree_kol.jpg/330px-Great_banyan_tree_kol.jpg",
+  "source": "wikipedia",
+  "label": "Ficus benghalensis",
+  "title": "Ficus benghalensis"
+ },
+ "bodhi-tree": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Ficus_religiosa_Bo.jpg/500px-Ficus_religiosa_Bo.jpg",
+  "source": "wikipedia",
+  "label": "Ficus religiosa",
+  "title": "Ficus religiosa"
+ },
+ "ashvattha-gita": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Ficus_religiosa_Bo.jpg/500px-Ficus_religiosa_Bo.jpg",
+  "source": "wikipedia",
+  "label": "Ficus religiosa",
+  "title": "Ficus religiosa"
+ },
+ "ashoka-indian": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Ashoka_Flower.jpg/500px-Ashoka_Flower.jpg",
+  "source": "wikipedia",
+  "label": "Saraca",
+  "title": "Saraca"
+ },
+ "tala-nirvana": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Borassus_flabellifer.jpg/500px-Borassus_flabellifer.jpg",
+  "source": "wikipedia",
+  "label": "Borassus flabellifer",
+  "title": "Borassus flabellifer"
+ },
+ "pippal-banyan": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Great_banyan_tree_kol.jpg/500px-Great_banyan_tree_kol.jpg",
+  "source": "wikipedia",
+  "label": "Ficus benghalensis",
+  "title": "Ficus benghalensis"
+ },
+ "mango-hindu": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e3/Mangoes_%28Magnifera_indica%29_from_India.jpg/330px-Mangoes_%28Magnifera_indica%29_from_India.jpg",
+  "source": "wikipedia",
+  "label": "Mangifera indica",
+  "title": "Mangifera indica"
+ },
+ "xiwangmu-peach": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Illustration_Prunus_persica_clean_no_descr.jpg/330px-Illustration_Prunus_persica_clean_no_descr.jpg",
+  "source": "wikipedia",
+  "label": "Peach",
+  "title": "Prunus persica"
+ },
+ "jing-tree": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Cinnamomum_camphora20050314.jpg/330px-Cinnamomum_camphora20050314.jpg",
+  "source": "wikipedia",
+  "label": "Camphora officinarum",
+  "title": "Cinnamomum camphora"
+ },
+ "jade-tree": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Flickr_-_archer10_%28Dennis%29_-_Guatemala-1376.jpg/500px-Flickr_-_archer10_%28Dennis%29_-_Guatemala-1376.jpg",
+  "source": "wikipedia",
+  "label": "Pachira aquatica",
+  "title": "Pachira aquatica"
+ },
+ "penglai": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Illustration_Prunus_persica_clean_no_descr.jpg/330px-Illustration_Prunus_persica_clean_no_descr.jpg",
+  "source": "wikipedia",
+  "label": "Peach",
+  "title": "Prunus persica"
+ },
+ "sun-god-nagi": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/M_thunbergii.JPG/330px-M_thunbergii.JPG",
+  "source": "wikipedia",
+  "label": "Machilus",
+  "title": "Machilus"
+ },
+ "isonokami-fig": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Sycomoros_old.jpg/330px-Sycomoros_old.jpg",
+  "source": "wikipedia",
+  "label": "Ficus",
+  "title": "Ficus"
+ },
+ "dado-world-tree": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Eucalyptus_tereticornis_flowers%2C_capsules%2C_buds_and_foliage.jpeg/330px-Eucalyptus_tereticornis_flowers%2C_capsules%2C_buds_and_foliage.jpeg",
+  "source": "wikipedia",
+  "label": "Eucalyptus",
+  "title": "Eucalyptus"
+ },
+ "champa-samye": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Michelia_champaca_Blanco1.191-cropped.jpg/330px-Michelia_champaca_Blanco1.191-cropped.jpg",
+  "source": "wikipedia",
+  "label": "Magnolia champaca",
+  "title": "Michelia champaca"
+ },
+ "mongol-ukhai": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/Lapo_gyslos.jpeg/330px-Lapo_gyslos.jpeg",
+  "source": "wikipedia",
+  "label": "Populus",
+  "title": "Populus"
+ },
+ "ryukyu-kuyaa": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Cinnamomum_camphora20050314.jpg/330px-Cinnamomum_camphora20050314.jpg",
+  "source": "wikipedia",
+  "label": "Camphora officinarum",
+  "title": "Cinnamomum camphora"
+ },
+ "vietnam-banyan": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Ficus_microcarpa_-_La_Gomera_01.jpg/330px-Ficus_microcarpa_-_La_Gomera_01.jpg",
+  "source": "wikipedia",
+  "label": "Ficus microcarpa",
+  "title": "Ficus microcarpa"
+ },
+ "philippines-bamboo": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Bamboo_forest.jpg/500px-Bamboo_forest.jpg",
+  "source": "wikipedia",
+  "label": "Bamboo",
+  "title": "Bamboo"
+ },
+ "thai-phi-tree": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Great_banyan_tree_kol.jpg/500px-Great_banyan_tree_kol.jpg",
+  "source": "wikipedia",
+  "label": "Ficus benghalensis",
+  "title": "Ficus benghalensis"
+ },
+ "angkor-banyan": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Great_banyan_tree_kol.jpg/500px-Great_banyan_tree_kol.jpg",
+  "source": "wikipedia",
+  "label": "Ficus benghalensis",
+  "title": "Ficus benghalensis"
+ },
+ "kaum-kaet": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Eucalyptus_tereticornis_flowers%2C_capsules%2C_buds_and_foliage.jpeg/330px-Eucalyptus_tereticornis_flowers%2C_capsules%2C_buds_and_foliage.jpeg",
+  "source": "wikipedia",
+  "label": "Eucalyptus",
+  "title": "Eucalyptus"
+ },
+ "dayak-world-tree": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Dipterocarpus_bourdillonii_01.JPG/330px-Dipterocarpus_bourdillonii_01.JPG",
+  "source": "wikipedia",
+  "label": "Dipterocarpus",
+  "title": "Dipterocarpus"
+ },
+ "javanese-kerasukan": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Sycomoros_old.jpg/330px-Sycomoros_old.jpg",
+  "source": "wikipedia",
+  "label": "Ficus",
+  "title": "Ficus"
+ },
+ "balinese-grove": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/Big_Banyan_Tree_at_Bangalore.jpg/330px-Big_Banyan_Tree_at_Bangalore.jpg",
+  "source": "wikipedia",
+  "label": "Banyan",
+  "title": "Banyan"
+ },
+ "myanmar-nat": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Dipterocarpus_bourdillonii_01.JPG/330px-Dipterocarpus_bourdillonii_01.JPG",
+  "source": "wikipedia",
+  "label": "Dipterocarpus",
+  "title": "Dipterocarpus"
+ },
+ "maya-witz": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Panguana-Lupuna-2008-2.jpg/500px-Panguana-Lupuna-2008-2.jpg",
+  "source": "wikipedia",
+  "label": "Ceiba pentandra",
+  "title": "Ceiba pentandra"
+ },
+ "kiche-world-tree": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Panguana-Lupuna-2008-2.jpg/500px-Panguana-Lupuna-2008-2.jpg",
+  "source": "wikipedia",
+  "label": "Ceiba pentandra",
+  "title": "Ceiba pentandra"
+ },
+ "aztec-amate": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Ficus_cotinifolia_33045599.jpg/500px-Ficus_cotinifolia_33045599.jpg",
+  "source": "wikipedia",
+  "label": "Ficus cotinifolia",
+  "title": "Ficus cotinifolia"
+ },
+ "tree-of-peace": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/Pinus_strobus_trees.jpg/330px-Pinus_strobus_trees.jpg",
+  "source": "wikipedia",
+  "label": "Pinus strobus",
+  "title": "Pinus strobus"
+ },
+ "lakota-sacred-tree": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Quercus_robur.jpg/330px-Quercus_robur.jpg",
+  "source": "wikipedia",
+  "label": "Oak",
+  "title": "Quercus"
+ },
+ "nw-coast-cedar": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Thuja_plicata_Vancouver.jpg/330px-Thuja_plicata_Vancouver.jpg",
+  "source": "wikipedia",
+  "label": "Thuja plicata",
+  "title": "Thuja plicata"
+ },
+ "inca-huaca": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/Polylepis_rugulosa_%28A._Yates%29.jpg/330px-Polylepis_rugulosa_%28A._Yates%29.jpg",
+  "source": "wikipedia",
+  "label": "Polylepis",
+  "title": "Polylepis"
+ },
+ "mapuche-pehuen": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Araucaria_en_Parque_Nacional_Conguillio.jpg/330px-Araucaria_en_Parque_Nacional_Conguillio.jpg",
+  "source": "wikipedia",
+  "label": "Araucaria araucana",
+  "title": "Araucaria araucana"
+ },
+ "maori-whakapapa": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5b/PohutukawaCornwallis.jpg/330px-PohutukawaCornwallis.jpg",
+  "source": "wikipedia",
+  "label": "Pōhutukawa",
+  "title": "Metrosideros excelsa"
+ },
+ "hawaiian-koa": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Acacia_koa_study_7.jpg/330px-Acacia_koa_study_7.jpg",
+  "source": "wikipedia",
+  "label": "Acacia koa",
+  "title": "Acacia koa"
+ },
+ "hawaiian-lehua": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Meliosma_veitchorum1.jpg/330px-Meliosma_veitchorum1.jpg",
+  "source": "wikipedia",
+  "label": "Meliosma",
+  "title": "Meliosma"
+ },
+ "aboriginal-dreaming": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Eucalyptus_tereticornis_flowers%2C_capsules%2C_buds_and_foliage.jpeg/330px-Eucalyptus_tereticornis_flowers%2C_capsules%2C_buds_and_foliage.jpeg",
+  "source": "wikipedia",
+  "label": "Eucalyptus",
+  "title": "Eucalyptus"
+ },
+ "baobab": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Baobab_and_elephant%2C_Tanzania.jpg/500px-Baobab_and_elephant%2C_Tanzania.jpg",
+  "source": "wikipedia",
+  "label": "Adansonia digitata",
+  "title": "Adansonia digitata"
+ },
+ "yoruba-iroko": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Milicia_roadside_small.jpg/330px-Milicia_roadside_small.jpg",
+  "source": "wikipedia",
+  "label": "Milicia excelsa",
+  "title": "Milicia excelsa"
+ },
+ "dogon-tree": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Yggdrasil.jpg/500px-Yggdrasil.jpg",
+  "source": "wikipedia",
+  "label": "Tree of life",
+  "title": "Tree of life"
+ },
+ "persian-haoma": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Ephedra_distachya_%28with_cones%29_2011_1.jpg/500px-Ephedra_distachya_%28with_cones%29_2011_1.jpg",
+  "source": "wikipedia",
+  "label": "Ephedra distachya",
+  "title": "Ephedra vulgaris"
+ },
+ "soma-vedic": {
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Peganum_harmala_kz02.jpg/330px-Peganum_harmala_kz02.jpg",
+  "source": "wikipedia",
+  "label": "Peganum harmala",
+  "title": "Peganum harmala"
+ },
+ "aztec-ometl": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Panguana-Lupuna-2008-2.jpg/500px-Panguana-Lupuna-2008-2.jpg",
+  "source": "wikipedia",
+  "label": "Ceiba pentandra",
+  "title": "Ceiba pentandra"
+ },
+ "yoruba-egbesu": {
+  "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Baobab_and_elephant%2C_Tanzania.jpg/500px-Baobab_and_elephant%2C_Tanzania.jpg",
+  "source": "wikipedia",
+  "label": "Adansonia digitata",
+  "title": "Adansonia digitata"
+ }
+}

@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tree of Life — Sacred Trees of the World</title>
+<meta name="description" content="An interactive atlas of 57 sacred and mythic trees from ten world traditions — Yggdrasil, Bodhi, Ashvattha, Wang, Qilin, and more.">
+<style>
+  :root{
+    --bg0:#070b09; --bg1:#0d1512; --ink:#e8e2d4; --ink-dim:#9aa392;
+    --line:#2a3a30; --panel:#0f1713; --node:#141d18; --gold:#c9a86a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family: Georgia,'Iowan Old Style','Palatino Linotype',serif;
+    background: radial-gradient(120% 90% at 50% 15%, var(--bg1) 0%, var(--bg0) 70%);
+    color:var(--ink); overflow:hidden;
+  }
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:20;
+    display:flex; align-items:center; gap:18px; padding:14px 22px;
+    background:linear-gradient(180deg, rgba(7,11,9,.92), rgba(7,11,9,.55) 80%, transparent);
+    backdrop-filter: blur(6px);
+  }
+  .brand{display:flex; align-items:center; gap:12px; min-width:0}
+  .brand svg{width:34px;height:34px;flex:none}
+  .brand h1{font-size:17px; letter-spacing:.22em; font-weight:600; white-space:nowrap}
+  .brand .sub{font-size:11.5px; color:var(--ink-dim); letter-spacing:.04em; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  header .spacer{flex:1}
+  #search{
+    background:rgba(20,29,24,.8); border:1px solid var(--line); color:var(--ink);
+    border-radius:999px; padding:8px 16px; font:inherit; font-size:13.5px; width:230px;
+    outline:none; transition:border-color .2s, width .25s;
+  }
+  #search:focus{border-color:var(--gold); width:280px}
+  #search::placeholder{color:#6d786b}
+  #count{font-size:12px; color:var(--ink-dim); letter-spacing:.06em; white-space:nowrap}
+  main{display:flex; height:100%; width:100%}
+  #stage{flex:1; position:relative; min-width:0}
+  #tree{width:100%; height:100%; display:block}
+  .branch{fill:none; stroke:#415247; stroke-linecap:round; transition:stroke .3s, opacity .3s}
+  .trunk{fill:#243029}
+  .trunk-edge{fill:none; stroke:#415247; stroke-width:1.5}
+  .ground{fill:#1a241e}
+  .glow{pointer-events:none}
+  .node{cursor:pointer; transition:opacity .3s}
+  .node circle.body{fill:var(--node); stroke-width:2; transition:transform .18s ease, stroke-width .18s; transform-box:fill-box; transform-origin:center}
+  .node:hover circle.body{transform:scale(1.28); stroke-width:3}
+  .node.dim{opacity:.14; pointer-events:none}
+  .node.active circle.body{stroke-width:3.5; filter:drop-shadow(0 0 10px currentColor)}
+  .node text{font-family:Georgia,serif}
+  .rlabel{cursor:pointer}
+  .rlabel text{fill:var(--ink); font-size:15px; letter-spacing:.14em; opacity:.82; transition:opacity .2s, fill .2s}
+  .rlabel .rcount{fill:var(--ink-dim); font-size:11px; letter-spacing:.1em}
+  .rlabel:hover text{opacity:1; fill:var(--gold)}
+  .rlabel.dim{opacity:.25}
+  /* panel */
+  #panel{
+    position:fixed; top:0; right:0; bottom:0; width:min(460px, 94vw); z-index:30;
+    background:var(--panel); border-left:1px solid var(--line);
+    transform:translateX(105%); transition:transform .35s cubic-bezier(.22,.8,.3,1);
+    display:flex; flex-direction:column;
+  }
+  #panel.open{transform:translateX(0); box-shadow:-30px 0 60px rgba(0,0,0,.5)}
+  .p-head{position:relative; padding:26px 28px 18px; border-bottom:1px solid var(--line); background:radial-gradient(90% 130% at 20% 0%, rgba(255,255,255,.03), transparent)}
+  #close{
+    position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%;
+    border:1px solid var(--line); background:transparent; color:var(--ink-dim);
+    font-size:15px; cursor:pointer; line-height:1; transition:all .2s;
+  }
+  #close:hover{color:var(--ink); border-color:var(--gold)}
+  .p-emblem{width:64px; height:64px; margin-bottom:14px}
+  .p-emblem svg{width:100%; height:100%}
+  #panel h2{font-size:23px; line-height:1.25; font-weight:600; padding-right:36px}
+  .native{font-size:14px; color:var(--ink-dim); margin-top:6px; font-style:italic; line-height:1.45}
+  .meta{display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; margin-top:16px}
+  .meta .k{font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); opacity:.85}
+  .meta .v{font-size:13.5px; line-height:1.45; margin-top:2px}
+  .p-body{overflow-y:auto; padding:22px 28px 40px; flex:1; scrollbar-width:thin; scrollbar-color:#2a3a30 transparent}
+  .p-body h3{font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin:26px 0 9px; font-weight:600}
+  .p-body h3:first-child{margin-top:0}
+  .p-body p{font-size:14.5px; line-height:1.72; color:#d6d2c4}
+  .p-photo{margin:0 0 4px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:rgba(255,255,255,.03)}
+  .p-photo img{display:block; width:100%; height:250px; object-fit:cover}
+  .p-photo figcaption{font-size:11px; color:#5c685c; line-height:1.55; padding:8px 12px; border-top:1px solid var(--line)}
+  .chips{display:flex; flex-wrap:wrap; gap:7px}
+  .chip{font-size:12.5px; border:1px solid var(--line); border-radius:999px; padding:4px 12px; color:#cfd6c6; background:rgba(255,255,255,.02)}
+  .src{list-style:none; margin-top:2px}
+  .src li{font-size:13px; color:var(--ink-dim); line-height:1.6; padding:4px 0 4px 16px; position:relative}
+  .src li:before{content:"—"; position:absolute; left:0; color:#4a5a4e}
+  .footer-note{font-size:11px; color:#5c685c; line-height:1.6; margin-top:26px; border-top:1px solid var(--line); padding-top:14px}
+  #hint{
+    position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
+    font-size:12px; color:var(--ink-dim); letter-spacing:.08em; white-space:nowrap;
+    transition:opacity .6s;
+  }
+  @media (max-width:900px){
+    .brand .sub{display:none}
+    #search{width:150px}
+    #count{display:none}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 40 40" aria-hidden="true">
+      <path d="M20 36 L20 20 M20 24 L12 13 M20 22 L28 11 M12 13 L9 9 M28 11 L31 7" stroke="#c9a86a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="20" cy="36" r="2.4" fill="#c9a86a"/>
+    </svg>
+    <div>
+      <h1>TREE OF LIFE</h1>
+      <div class="sub" id="subtitle">Sacred &amp; mythic trees of the world</div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <input id="search" type="text" placeholder="Search trees, cultures, species…" autocomplete="off" spellcheck="false">
+  <div id="count"></div>
+</header>
+<main>
+  <div id="stage">
+    <svg id="tree" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Tree of life with ten regional branches"></svg>
+    <div id="hint">click a glowing node to read its story · click a branch name to focus a region</div>
+  </div>
+</main>
+<aside id="panel" aria-hidden="true">
+  <div class="p-head">
+    <button id="close" aria-label="Close">✕</button>
+    <div class="p-emblem" id="p-emblem"></div>
+    <h2 id="p-name"></h2>
+    <div class="native" id="p-native"></div>
+    <div class="meta" id="p-meta"></div>
+  </div>
+  <div class="p-body" id="p-body"></div>
+</aside>
+
+<script>
+const DATA = /*__DATA__*/;
+const REGIONS = {"ancient-near-east":"Ancient Near East","egypt":"Egypt","persia":"Persia & Zoroastrian","europe":"Europe","africa":"Africa","south-asia":"South Asia","southeast-asia":"Southeast Asia","east-asia":"East Asia","americas":"The Americas","oceania":"Oceania & Pacific"};
+const ORDER = ["europe","africa","egypt","ancient-near-east","persia","south-asia","southeast-asia","east-asia","americas","oceania"];
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById('tree');
+let activeId = null, regionFocus = null;
+
+function el(tag, attrs){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+function qpoint(a, c, b, t){ const u=1-t; return [u*u*a[0]+2*u*t*c[0]+t*t*b[0], u*u*a[1]+2*u*t*c[1]+t*t*b[1]]; }
+function qdir(a, c, b, t){ const u=1-t; const dx=2*u*(c[0]-a[0])+2*t*(b[0]-c[0]), dy=2*u*(c[1]-a[1])+2*t*(b[1]-c[1]); const m=Math.hypot(dx,dy)||1; return [dx/m, dy/m]; }
+
+/* ---------- emblem glyphs (viewBox 40x40) ---------- */
+function glyphPaths(em){
+  const f = em.form||'round';
+  const p = [];
+  const canopy = {
+    round:   {c:[20,14], r:9},
+    conical: {tri:[[20,5],[11.5,25],[28.5,25]]},
+    tall:    {e:[20,13], rx:5.5, ry:10.5},
+    branching:{}, roots:{}, frond:{}, multi:{}
+  }[f];
+  const trunk = (y1,y2,w=1.8)=>p.push({d:`M20 ${y1} L20 ${y2}`, w});
+  if (f==='round'){ p.push({d:`M${20-9} 14 A9 9 0 1 0 ${20+9} 14 A9 9 0 1 0 ${20-9} 14 Z`, fill:.3}); trunk(23,32,2.4); }
+  if (f==='conical'){ p.push({d:`M20 5 L11.5 25 L28.5 25 Z`, fill:.3}); trunk(25,32,2.4); }
+  if (f==='tall'){ p.push({d:`M14.5 13 A5.5 10.5 0 1 0 25.5 13 A5.5 10.5 0 1 0 14.5 13 Z`, fill:.3}); trunk(23,32,2.2); }
+  if (f==='branching'){ trunk(32,17,2.2); p.push({d:'M20 23 L12 12',w:1.6},{d:'M20 20 L28 9',w:1.6},{d:'M12 12 L9 8',w:1.4},{d:'M28 9 L31 5.5',w:1.4},{d:'M20 17 L16 10',w:1.4}); }
+  if (f==='roots'){ p.push({d:'M15.5 12 A4.5 4.5 0 1 0 24.5 12 A4.5 4.5 0 1 0 15.5 12 Z', fill:.3}); trunk(16,25,2); p.push({d:'M20 25 L12 34',w:1.6},{d:'M20 25 L28 34',w:1.6},{d:'M20 25 L20 35',w:1.4},{d:'M12 34 L9 33',w:1.2},{d:'M28 34 L31 33',w:1.2}); }
+  if (f==='frond'){ trunk(33,13,2); p.push({d:'M20 13 C13 8 8 11 5 7',w:1.6},{d:'M20 13 C27 8 32 11 35 7',w:1.6},{d:'M20 13 C14 16 9 15 6 18',w:1.4},{d:'M20 13 C26 16 31 15 34 18',w:1.4}); }
+  if (f==='multi'){ p.push({d:'M9 13 A5 5 0 1 0 19 13 A5 5 0 1 0 9 13 Z', fill:.3},{d:'M21 13 A5 5 0 1 0 31 13 A5 5 0 1 0 21 13 Z', fill:.3},{d:'M15 24 A5 5 0 1 0 25 24 A5 5 0 1 0 15 24 Z', fill:.3}); trunk(33,29,1.4); p.push({d:'M20 33 L14 17',w:1.2},{d:'M20 33 L26 17',w:1.2}); }
+  /* features */
+  if (em.fruit) p.push({d:'M15 12 A1.7 1.7 0 1 0 18.4 12 A1.7 1.7 0 1 0 15 12 Z'},{d:'M23.5 16 A1.7 1.7 0 1 0 26.9 16 A1.7 1.7 0 1 0 23.5 16 Z'});
+  if (em.star) p.push({d:'M20 1.5 L21.6 4.5 L24.6 6 L21.6 7.5 L20 10.5 L18.4 7.5 L15.4 6 L18.4 4.5 Z', fill:1});
+  if (em.jewels) p.push({d:'M31 9 L32.2 11.4 L34.6 12.6 L32.2 13.8 L31 16.2 L29.8 13.8 L27.4 12.6 L29.8 11.4 Z', fill:1});
+  if (em.bands) p.push({d:'M13 12 L27 12', w:1.1},{d:'M13.5 16.5 L26.5 16.5', w:1.1});
+  if (em.cascade) p.push({d:'M33 10 C35.5 13 30.5 15 33 18 C35 20.5 31 22.5 33 25', w:1.4});
+  if (em.fronds) p.push({d:'M8 30 C11 27 14 29 16 31', w:1.2},{d:'M24 31 C27 28 30 30 33 28', w:1.2});
+  if (em.wells) p.push({d:'M9 36 C14 39 26 39 31 36', w:1.3, dash:'3 2.6'});
+  if (em.wind) p.push({d:'M6 16 C9 15 11 17 9.5 19.5', w:1.3},{d:'M4 21 C8 20 11 22 9 24.5', w:1.3});
+  if (em.bolt) p.push({d:'M24 2 L18.5 10 L22.5 10 L16.5 19', w:1.5});
+  return p;
+}
+function emblemSVG(em, size){
+  const col = em.accent || '#c9a86a';
+  let inner = '';
+  for (const g of glyphPaths(em)){
+    if (g.fill){ inner += `<path d="${g.d}" fill="${col}" fill-opacity="${g.fill===1?0.95:0.35}" stroke="none"/>`; }
+    else { inner += `<path d="${g.d}" fill="none" stroke="${col}" stroke-width="${g.w||1.6}" stroke-linecap="round" stroke-linejoin="round"${g.dash?` stroke-dasharray="${g.dash}"`:''}/>`; }
+  }
+  return `<svg viewBox="0 0 40 40" width="${size}" height="${size}" aria-hidden="true">${inner}</svg>`;
+}
+
+/* ---------- tree geometry ---------- */
+const TIPS = {
+  "europe":[148,712], "africa":[96,532], "egypt":[152,352], "ancient-near-east":[300,214], "persia":[448,126],
+  "south-asia":[556,122], "southeast-asia":[704,210], "east-asia":[856,348], "americas":[908,528], "oceania":[854,708]
+};
+const ATTACH = {
+  "europe":[489,848], "africa":[494,752], "egypt":[497,662], "ancient-near-east":[499,586], "persia":[500,534],
+  "south-asia":[501,538], "southeast-asia":[502,592], "east-asia":[504,668], "americas":[506,758], "oceania":[511,852]
+};
+const groups = {};
+DATA.forEach(t => (groups[t.region] = groups[t.region] || []).push(t));
+
+function build(){
+  /* defs: glow filter + gradient */
+  const defs = el('defs',{});
+  defs.innerHTML = `
+    <radialGradient id="bgGlow" cx="50%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#1d3327" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#1d3327" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="trunkG" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#2c3a31"/>
+      <stop offset="100%" stop-color="#1e2a22"/>
+    </linearGradient>`;
+  svg.appendChild(defs);
+  svg.appendChild(el('ellipse',{cx:500,cy:470,rx:430,ry:420,class:'glow',fill:'url(#bgGlow)'}));
+  /* ground */
+  svg.appendChild(el('ellipse',{cx:500,cy:952,rx:210,ry:14,class:'ground'}));
+  /* trunk */
+  const trunk = el('path',{class:'trunk', d:'M471 952 C481 830 486 690 494 536 L506 536 C514 690 519 830 529 952 C512 944 488 944 471 952 Z', fill:'url(#trunkG)'});
+  svg.appendChild(trunk);
+  /* branches + nodes per region */
+  for (const r of ORDER){
+    const a = ATTACH[r], b = TIPS[r];
+    const dx=b[0]-a[0], dy=b[1]-a[1];
+    const nx=-dy, ny=dx, m=Math.hypot(nx,ny)||1;
+    const side = (b[0] < a[0]) ? 1 : -1; /* bulge outward */
+    const c = [(a[0]+b[0])/2 + (nx/m)*34*side, (a[1]+b[1])/2 + (ny/m)*34*side];
+    const bg = el('g',{class:'rlabel','data-region':r});
+    bg.appendChild(el('path',{class:'branch', d:`M${a[0]} ${a[1]} Q${c[0]} ${c[1]} ${b[0]} ${b[1]}`, 'stroke-width': r==='egypt'||r==='persia' ? 5 : 6.5}));
+    /* label position: outward from tip */
+    const dir = [b[0]-a[0], b[1]-a[1]], lm=Math.hypot(dir[0],dir[1])||1;
+    const ux=dir[0]/lm, uy=dir[1]/lm;
+    const lx = b[0]+ux*26, ly = b[1]+uy*26;
+    const anchor = Math.abs(ux)<0.35 ? 'middle' : (ux>0?'start':'end');
+    const name = el('text',{x:lx, y:ly+ (uy>0.4? 8 : uy<-0.4? -12 : 4), 'text-anchor':anchor});
+    name.textContent = REGIONS[r].toUpperCase();
+    bg.appendChild(name);
+    const cnt = el('text',{x:lx, y:ly+22+(uy>0.4? 8:0), class:'rcount','text-anchor':anchor});
+    cnt.textContent = `${groups[r].length} trees`;
+    bg.appendChild(cnt);
+    bg.addEventListener('click', ()=>toggleRegion(r));
+    svg.appendChild(bg);
+
+    const trees = groups[r].slice().sort((x,y)=>x.name.localeCompare(y.name));
+    trees.forEach((t,i)=>{
+      const n = trees.length;
+      const ti = n===1 ? 0.72 : 0.40 + 0.54*(i/(n-1));
+      const p = qpoint(a,c,b,ti);
+      const d = qdir(a,c,b,ti);
+      const off = (i%2===0?1:-1) * 26;
+      const px = p[0] + (-d[1])*off, py = p[1] + d[0]*off;
+      const node = el('g',{class:'node','data-id':t.id,'data-region':t.region, transform:`translate(${px} ${py})`});
+      node.style.color = t.emblem.accent||'#c9a86a';
+      node.appendChild(el('circle',{class:'body', r:17, stroke:t.emblem.accent||'#c9a86a'}));
+      const g = el('g',{transform:'translate(-11 -11)'});
+      g.innerHTML = emblemSVG(t.emblem, 22);
+      node.appendChild(g);
+      node.addEventListener('click', ev=>{ ev.stopPropagation(); openPanel(t); });
+      svg.appendChild(node);
+    });
+  }
+  document.getElementById('count').textContent = `${DATA.length} trees · ${ORDER.length} regions`;
+  document.getElementById('subtitle').textContent = `Sacred & mythic trees of the world — ${DATA.length} traditions across ${ORDER.length} regions`;
+}
+
+/* ---------- interactions ---------- */
+function openPanel(t){
+  activeId = t.id;
+  document.querySelectorAll('.node').forEach(n=>n.classList.toggle('active', n.dataset.id===t.id));
+  const meta = [['Region', REGIONS[t.region]],['Culture',t.culture],['Era',t.era],['Type',t.type],['Tree',t.tree],['Region id',null]];
+  const mEl = document.getElementById('p-meta');
+  mEl.innerHTML = [['Region',REGIONS[t.region]],['Culture',t.culture],['Era',t.era],['Type',t.type],['Tree',t.tree]]
+    .map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  document.getElementById('p-emblem').innerHTML = emblemSVG(t.emblem, 64);
+  document.getElementById('p-name').textContent = t.name;
+  document.getElementById('p-native').textContent = t.native;
+  const body = document.getElementById('p-body');
+  const photo = t.photo ? `<figure class="p-photo"><img src="${t.photo.url}" alt="${t.photo.label}" loading="lazy" onerror="this.closest('.p-photo').remove()"><figcaption>${t.photo.label} · species photo via Wikimedia Commons (Creative Commons)</figcaption></figure>` : '';
+  let h = photo + `<h3>The Story</h3><p>${t.story}</p>
+           <h3>History</h3><p>${t.history}</p>
+           <h3>Details</h3><p>${t.details}</p>
+           <h3>Symbolism</h3><div class="chips">${t.symbolism.map(s=>`<span class="chip">${s}</span>`).join('')}</div>
+           <h3>Sources</h3><ul class="src">${t.sources.map(s=>`<li>${s}</li>`).join('')}</ul>
+           <div class="footer-note">Compiled from primary religious texts, comparative mythology, and botanical references. Names in original scripts given where standard. Species photos via Wikimedia Commons (Creative Commons licenses).</div>`;
+  body.innerHTML = h;
+  body.scrollTop = 0;
+  const p = document.getElementById('panel');
+  p.classList.add('open'); p.setAttribute('aria-hidden','false');
+  document.getElementById('hint').style.opacity = 0;
+}
+function closePanel(){
+  activeId = null;
+  document.querySelectorAll('.node.active').forEach(n=>n.classList.remove('active'));
+  const p = document.getElementById('panel');
+  p.classList.remove('open'); p.setAttribute('aria-hidden','true');
+}
+function toggleRegion(r){
+  regionFocus = (regionFocus===r) ? null : r;
+  applyFilter();
+}
+function applyFilter(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const matches = t => !q || (t.name+' '+t.culture+' '+t.tree+' '+t.type+' '+t.native).toLowerCase().includes(q);
+  document.querySelectorAll('.node').forEach(n=>{
+    const t = DATA.find(x=>x.id===n.dataset.id);
+    const ok = matches(t) && (!regionFocus || t.region===regionFocus);
+    n.classList.toggle('dim', !ok);
+  });
+  document.querySelectorAll('.rlabel').forEach(l=>l.classList.toggle('dim', !!regionFocus && l.dataset.region!==regionFocus));
+}
+document.getElementById('search').addEventListener('input', applyFilter);
+document.getElementById('close').addEventListener('click', closePanel);
+document.addEventListener('keydown', e=>{ if (e.key==='Escape') closePanel(); });
+build();
+</script>
+</body>
+</html>

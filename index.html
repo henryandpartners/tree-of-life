@@ -1,0 +1,2240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tree of Life — Sacred Trees of the World</title>
+<meta name="description" content="An interactive atlas of 57 sacred and mythic trees from ten world traditions — Yggdrasil, Bodhi, Ashvattha, Wang, Qilin, and more.">
+<style>
+  :root{
+    --bg0:#070b09; --bg1:#0d1512; --ink:#e8e2d4; --ink-dim:#9aa392;
+    --line:#2a3a30; --panel:#0f1713; --node:#141d18; --gold:#c9a86a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family: Georgia,'Iowan Old Style','Palatino Linotype',serif;
+    background: radial-gradient(120% 90% at 50% 15%, var(--bg1) 0%, var(--bg0) 70%);
+    color:var(--ink); overflow:hidden;
+  }
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:20;
+    display:flex; align-items:center; gap:18px; padding:14px 22px;
+    background:linear-gradient(180deg, rgba(7,11,9,.92), rgba(7,11,9,.55) 80%, transparent);
+    backdrop-filter: blur(6px);
+  }
+  .brand{display:flex; align-items:center; gap:12px; min-width:0}
+  .brand svg{width:34px;height:34px;flex:none}
+  .brand h1{font-size:17px; letter-spacing:.22em; font-weight:600; white-space:nowrap}
+  .brand .sub{font-size:11.5px; color:var(--ink-dim); letter-spacing:.04em; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  header .spacer{flex:1}
+  #search{
+    background:rgba(20,29,24,.8); border:1px solid var(--line); color:var(--ink);
+    border-radius:999px; padding:8px 16px; font:inherit; font-size:13.5px; width:230px;
+    outline:none; transition:border-color .2s, width .25s;
+  }
+  #search:focus{border-color:var(--gold); width:280px}
+  #search::placeholder{color:#6d786b}
+  #count{font-size:12px; color:var(--ink-dim); letter-spacing:.06em; white-space:nowrap}
+  main{display:flex; height:100%; width:100%}
+  #stage{flex:1; position:relative; min-width:0}
+  #tree{width:100%; height:100%; display:block}
+  .branch{fill:none; stroke:#415247; stroke-linecap:round; transition:stroke .3s, opacity .3s}
+  .trunk{fill:#243029}
+  .trunk-edge{fill:none; stroke:#415247; stroke-width:1.5}
+  .ground{fill:#1a241e}
+  .glow{pointer-events:none}
+  .node{cursor:pointer; transition:opacity .3s}
+  .node circle.body{fill:var(--node); stroke-width:2; transition:transform .18s ease, stroke-width .18s; transform-box:fill-box; transform-origin:center}
+  .node:hover circle.body{transform:scale(1.28); stroke-width:3}
+  .node.dim{opacity:.14; pointer-events:none}
+  .node.active circle.body{stroke-width:3.5; filter:drop-shadow(0 0 10px currentColor)}
+  .node text{font-family:Georgia,serif}
+  .rlabel{cursor:pointer}
+  .rlabel text{fill:var(--ink); font-size:15px; letter-spacing:.14em; opacity:.82; transition:opacity .2s, fill .2s}
+  .rlabel .rcount{fill:var(--ink-dim); font-size:11px; letter-spacing:.1em}
+  .rlabel:hover text{opacity:1; fill:var(--gold)}
+  .rlabel.dim{opacity:.25}
+  /* panel */
+  #panel{
+    position:fixed; top:0; right:0; bottom:0; width:min(460px, 94vw); z-index:30;
+    background:var(--panel); border-left:1px solid var(--line);
+    transform:translateX(105%); transition:transform .35s cubic-bezier(.22,.8,.3,1);
+    display:flex; flex-direction:column;
+  }
+  #panel.open{transform:translateX(0); box-shadow:-30px 0 60px rgba(0,0,0,.5)}
+  .p-head{position:relative; padding:26px 28px 18px; border-bottom:1px solid var(--line); background:radial-gradient(90% 130% at 20% 0%, rgba(255,255,255,.03), transparent)}
+  #close{
+    position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%;
+    border:1px solid var(--line); background:transparent; color:var(--ink-dim);
+    font-size:15px; cursor:pointer; line-height:1; transition:all .2s;
+  }
+  #close:hover{color:var(--ink); border-color:var(--gold)}
+  .p-emblem{width:64px; height:64px; margin-bottom:14px}
+  .p-emblem svg{width:100%; height:100%}
+  #panel h2{font-size:23px; line-height:1.25; font-weight:600; padding-right:36px}
+  .native{font-size:14px; color:var(--ink-dim); margin-top:6px; font-style:italic; line-height:1.45}
+  .meta{display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; margin-top:16px}
+  .meta .k{font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); opacity:.85}
+  .meta .v{font-size:13.5px; line-height:1.45; margin-top:2px}
+  .p-body{overflow-y:auto; padding:22px 28px 40px; flex:1; scrollbar-width:thin; scrollbar-color:#2a3a30 transparent}
+  .p-body h3{font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin:26px 0 9px; font-weight:600}
+  .p-body h3:first-child{margin-top:0}
+  .p-body p{font-size:14.5px; line-height:1.72; color:#d6d2c4}
+  .p-photo{margin:0 0 4px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:rgba(255,255,255,.03)}
+  .p-photo img{display:block; width:100%; height:250px; object-fit:cover}
+  .p-photo figcaption{font-size:11px; color:#5c685c; line-height:1.55; padding:8px 12px; border-top:1px solid var(--line)}
+  .chips{display:flex; flex-wrap:wrap; gap:7px}
+  .chip{font-size:12.5px; border:1px solid var(--line); border-radius:999px; padding:4px 12px; color:#cfd6c6; background:rgba(255,255,255,.02)}
+  .src{list-style:none; margin-top:2px}
+  .src li{font-size:13px; color:var(--ink-dim); line-height:1.6; padding:4px 0 4px 16px; position:relative}
+  .src li:before{content:"—"; position:absolute; left:0; color:#4a5a4e}
+  .footer-note{font-size:11px; color:#5c685c; line-height:1.6; margin-top:26px; border-top:1px solid var(--line); padding-top:14px}
+  #hint{
+    position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
+    font-size:12px; color:var(--ink-dim); letter-spacing:.08em; white-space:nowrap;
+    transition:opacity .6s;
+  }
+  @media (max-width:900px){
+    .brand .sub{display:none}
+    #search{width:150px}
+    #count{display:none}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 40 40" aria-hidden="true">
+      <path d="M20 36 L20 20 M20 24 L12 13 M20 22 L28 11 M12 13 L9 9 M28 11 L31 7" stroke="#c9a86a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="20" cy="36" r="2.4" fill="#c9a86a"/>
+    </svg>
+    <div>
+      <h1>TREE OF LIFE</h1>
+      <div class="sub" id="subtitle">Sacred &amp; mythic trees of the world</div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <input id="search" type="text" placeholder="Search trees, cultures, species…" autocomplete="off" spellcheck="false">
+  <div id="count"></div>
+</header>
+<main>
+  <div id="stage">
+    <svg id="tree" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Tree of life with ten regional branches"></svg>
+    <div id="hint">click a glowing node to read its story · click a branch name to focus a region</div>
+  </div>
+</main>
+<aside id="panel" aria-hidden="true">
+  <div class="p-head">
+    <button id="close" aria-label="Close">✕</button>
+    <div class="p-emblem" id="p-emblem"></div>
+    <h2 id="p-name"></h2>
+    <div class="native" id="p-native"></div>
+    <div class="meta" id="p-meta"></div>
+  </div>
+  <div class="p-body" id="p-body"></div>
+</aside>
+
+<script>
+const DATA = [
+ {
+  "id": "garden-eden",
+  "name": "Tree of the Knowledge of Good and Evil",
+  "native": "עץ הדעת טוב ורע · etz ha-da'at tov va-ra",
+  "culture": "Hebrew / Ancient Near East",
+  "region": "ancient-near-east",
+  "era": "Second Temple period codified (6th c. BCE onward)",
+  "type": "Biblical / mythological tree",
+  "tree": "Unspecified (interpreted as fig, grape, or wheat in later exegesis)",
+  "story": "In the Garden of Eden, God plants a garden and sets in it two trees: the Tree of Life and the Tree of the Knowledge of Good and Evil. God commands Adam and Eve not to eat from the tree of knowledge, but the serpent tempts them. They eat, gain the knowledge of good and evil, and are cast from the garden, where cherubim and a flaming sword guard the way to the Tree of Life.",
+  "history": "The narrative in Genesis 2-3 is among the oldest and most retold creation myths in world literature. Later Jewish, Christian, and Islamic exegesis debated the tree's identity — the Targums and Church Fathers proposed the fig (the fig-leaf in Eden), the vine, or wheat. Medieval and Renaissance art fixed the tree as a central image of original sin and redemption.",
+  "details": "The tree functions as the archetypal forbidden fruit and the boundary between innocence and self-awareness. Its pairing with the Tree of Life encodes a theology of mortality: eating knowledge brings death, while the guarded Tree of Life offers the immortality humans forfeited. It became the single most reproduced 'tree of life' in Western art, from Byzantine icons to the Gothic Book of Kells and beyond.",
+  "symbolism": [
+   "forbidden knowledge",
+   "original sin",
+   "mortality vs. immortality",
+   "divine command",
+   "temptation"
+  ],
+  "sources": [
+   "Genesis 2-3",
+   "Targum Onqelos",
+   "Augustine, City of God",
+   "Book of Kells"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#7b4b2a",
+   "fruit": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Ficus_carica_L%2C_1771.jpg/500px-Ficus_carica_L%2C_1771.jpg",
+   "label": "Fig",
+   "title": "Ficus carica"
+  }
+ },
+ {
+  "id": "gilgamesh-tree",
+  "name": "The Lapis Tree of Gilgamesh",
+  "native": "nigal (cypress) of the cedar groves",
+  "culture": "Sumerian / Mesopotamian",
+  "region": "ancient-near-east",
+  "era": "Sumerian period; Epic of Gilgamesh ca. 2100-1200 BCE",
+  "type": "Mythological tree / quest object",
+  "tree": "Lapis / cedar",
+  "story": "After killing Humbaba, guardian of the Cedar Forest of the gods, the hero Gilgamesh and his companion Enkidu journey to the land of the gods. In some versions Gilgamesh receives a wondrous tree (a lapis tree or a 'tree of life' / 'plant of immortality') that confers eternal life; he leaves it behind, and it is lost to the mortal world.",
+  "history": "The Epic of Gilgamesh is the oldest known great work of literature. The episode where Gilgamesh seeks the plant of immortality and it is snatched by a serpent is a direct narrative ancestor of the Eden story and of countless 'quest for the elixir' myths. Mesopotamian palace reliefs show stylized sacred trees (the 'tree of life' motif) with a deity at the base, a standard icon from the 4th millennium BCE onward.",
+  "details": "The Mesopotamian sacred tree — often a cypress or cedar with banded trunk and a star or deity at its base — is one of humanity's oldest continuous visual symbols. It marks the axis between earth and heaven and the seat of divine kingship. The lost plant of Gilgamesh embodies the recurring theme of immortality glimpsed and then forfeited.",
+  "symbolism": [
+   "axis mundi",
+   "divine kingship",
+   "lost immortality",
+   "cosmic order"
+  ],
+  "sources": [
+   "Epic of Gilgamesh (Tablet XI)",
+   "Assyrian palace reliefs, Nimrud & Nineveh"
+  ],
+  "emblem": {
+   "form": "conical",
+   "accent": "#3f6f8f",
+   "bands": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/View_from_the_Barouk_Forest_1.JPG/500px-View_from_the_Barouk_Forest_1.JPG",
+   "label": "Cedrus",
+   "title": "Cedrus"
+  }
+ },
+ {
+  "id": "sumerian-sacred-tree",
+  "name": "Sumerian Tree of Life (Nigal)",
+  "native": "nigal / nì-gál",
+  "culture": "Sumerian",
+  "region": "ancient-near-east",
+  "era": "4th-3rd millennium BCE",
+  "type": "Icon / cult object",
+  "tree": "Cypress / date palm (stylized)",
+  "story": "In Sumerian myth the sacred tree stands at the meeting of heaven and earth. The goddess Inanna (Ishtar) descends and ascends through the tree; the tree is the ladder of the cosmos. Kings offer libations to the tree, and it is depicted with the sun-disc and the eight-pointed star at its crown.",
+  "history": "The 'tree of life' is a near-universal Mesopotamian motif, appearing on cylinder seals, reliefs, and temple architecture from the Early Dynastic period through the Neo-Assyrian era. It was a focus of royal and divine ritual, and its form — a tall trunk, tiered crown, and a star — became a fixed iconographic grammar.",
+  "details": "The tree is the axis mundi: the point where the realms of gods and humans intersect. Its crown bears the sun (or star), its trunk is often banded like a column, and a deity or king appears at its base. This grammar of 'tree = cosmos' recurred for four millennia and influenced the sacred trees of every Near Eastern culture that followed.",
+  "symbolism": [
+   "axis mundi",
+   "heaven-earth connection",
+   "solar crown",
+   "ritual center"
+  ],
+  "sources": [
+   "Sumerian cylinder seals (Early Dynastic)",
+   "Inanna's Descent",
+   "Ur & Eridu temple art"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#b08d3e",
+   "star": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Dates005.jpg/500px-Dates005.jpg",
+   "label": "Date palm",
+   "title": "Phoenix dactylifera"
+  }
+ },
+ {
+  "id": "egypt-sycamore",
+  "name": "Sycamore of the Goddesses (Ishked)",
+  "native": "isched / ished tree",
+  "culture": "Ancient Egyptian",
+  "region": "egypt",
+  "era": "Old Kingdom (ca. 2600 BCE) onward",
+  "type": "Religious icon / cult tree",
+  "tree": "Sycamore fig (Ficus sycomorus)",
+  "story": "The sycamore tree is the living body of the goddesses Hathor and Isis. In the myth of Osiris, Isis shelters and resurrects her husband beneath the sycamore; the tree becomes a symbol of rebirth, the afterlife, and the nurturing of the dead. The goddess is depicted seated in, or emerging from, the tree, offering water and life to those who pass.",
+  "history": "The sycamore is one of Egypt's most sacred trees, attested from the Old Kingdom. It appears in temple reliefs, on tomb walls of the Valley of the Kings, and in the Book of the Dead (Spell 113, 'The Tree of Isis'), where the deceased asks the ished tree for cool water and shade. The tree was planted in temple precincts and offered as a cult object.",
+  "details": "The ished tree is a symbol of the afterlife's nourishment, of the goddess as mother, and of cyclical renewal. It links the living and the dead, offering shade, water, and breath — the essentials of life. Its iconography (goddess in a tree, offering cup) is a direct precursor to later 'goddess in the tree' and 'tree of paradise' motifs.",
+  "symbolism": [
+   "rebirth",
+   "mother goddess",
+   "afterlife nourishment",
+   "renewal"
+  ],
+  "sources": [
+   "Book of the Dead, Spell 113",
+   "Temple reliefs, Dendera & Abydos",
+   "Pyramid & Coffin Texts"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#4f7d52",
+   "goddess": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Ficus_sycomorus_0003.jpg/500px-Ficus_sycomorus_0003.jpg",
+   "label": "Ficus sycomorus",
+   "title": "Ficus sycomorus"
+  }
+ },
+ {
+  "id": "egypt-ba-tree",
+  "name": "The Ba-Tree / Djed Pillar",
+  "native": "djed / wedjety",
+  "culture": "Ancient Egyptian",
+  "region": "egypt",
+  "era": "Old Kingdom onward",
+  "type": "Cult symbol / icon",
+  "tree": "Cedar trunk (stylized)",
+  "story": "The djed (or wedjety) pillar is a stylized tree-trunk — a cedar with bound horizontal bars — representing the spine of Osiris and the stability of the afterlife. To 'stabilize the djed' was to ensure the deceased's successful passage into eternity and the enduring strength of the pharaoh's reign.",
+  "history": "The djed appears from the Old Kingdom, carved on tombs and in temple chapels, often placed beside the ankh and the was-scepter as one of Egypt's core life-symbols. It was a physical cult object — a wooden pillar decorated with bands — ritually 'strengthened' in festivals.",
+  "details": "Though a pillar, the djed is a tree-symbol: the living trunk of Osiris, bound and standing. It encodes endurance, the backbone of the world, and the guarantee of eternal stability. Paired with the tree of Isis, it completes the Egyptian grammar of the sacred tree as life, death, and resurrection.",
+  "symbolism": [
+   "stability",
+   "Osiris's spine",
+   "eternity",
+   "strength of the state"
+  ],
+  "sources": [
+   "Book of the Dead",
+   "Djed pillar cult objects",
+   "Temple chapels, Deir el-Bahri"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#8a5a3b",
+   "bands": true,
+   "ankh": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/View_from_the_Barouk_Forest_1.JPG/500px-View_from_the_Barouk_Forest_1.JPG",
+   "label": "Cedrus",
+   "title": "Cedrus"
+  }
+ },
+ {
+  "id": "persian-ashoka",
+  "name": "Ashoka Tree (Zoroastrian)",
+  "native": "Ashoka / Āsawka",
+  "culture": "Persian / Zoroastrian",
+  "region": "persia",
+  "era": "Achaemenid (6th-4th c. BCE) onward",
+  "type": "Mythological / sacred tree",
+  "tree": "Cassia / Ashoka (stylized)",
+  "story": "The Ashoka (or 'asoka', the 'tree without sorrow') is a radiant sacred tree associated with divine kingship and paradise. In later Iranian and Indian traditions it blooms with jewels and fragrance, and its shade is the reward of the righteous. Kings are crowned beneath it, and it marks the garden of the gods (paradaiza, the root of 'paradise').",
+  "history": "The Ashoka tree is a pan-Iranian and Buddhist sacred motif. In Zoroastrian eschatology it is a tree of the final renovation (Shakadagha). Its name and image traveled with Achaemenid and Sasanian art, and the same tree reappears in Buddhist iconography (the tree under which the Buddha's mother conceived) — a rare case of one tree shared by two great traditions.",
+  "details": "The Ashoka embodies the 'paradise tree': a garden, a crown, and a blessing. It is the visual and narrative ancestor of the 'tree of paradise' in both Zoroastrian and Christian-adjacent imagery. Its double identity (Iranian + Buddhist) makes it a key node in the cross-cultural genealogy of the tree of life.",
+  "symbolism": [
+   "paradise",
+   "divine kingship",
+   "renewal without sorrow",
+   "garden of the gods"
+  ],
+  "sources": [
+   "Avestan tradition",
+   "Sasanian rock reliefs (Naqsh-e Rostam)",
+   "Buddhist Jataka tales"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#7a4f8f",
+   "jewels": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Ashoka_Flower.jpg/500px-Ashoka_Flower.jpg",
+   "label": "Saraca",
+   "title": "Saraca"
+  }
+ },
+ {
+  "id": "persian-haoma",
+  "name": "Haoma Tree",
+  "native": "Haoma / hāomā",
+  "culture": "Persian / Zoroastrian",
+  "region": "persia",
+  "era": "Rigvedic / Achaemenid period",
+  "type": "Sacred plant / ritual tree",
+  "tree": "Haoma (possibly ephedra or a sacred shrub)",
+  "story": "Haoma is the sacred, life-giving plant whose juice (haoma) is pressed and drunk in Zoroastrian ritual to grant wisdom, inspiration, and immortality. The god Haoma (and its Vedic counterpart Soma) is the divine source of vitality and of the prophet's revelation — the 'tree' that pours forth the nectar of the gods.",
+  "history": "Haoma is central to the Gathas (the oldest Zoroastrian hymns) and is the Iranian counterpart of the Vedic Soma. Its ritual pressing and drinking is one of the oldest continuous liturgical acts in the Iranian world. The plant's identity is debated (ephedra, pomegranate, or a lost species), but its role as the divine tree of revelation and life is unambiguous.",
+  "details": "As the 'tree of revelation,' Haoma/Soma links the tree of life to prophecy, inspiration, and divine intoxication — a theme echoed in the Christian Eucharist, in the Greek kykeon, and in the Norse mead of poetry. It is the tree that gives humans the gods' own vitality.",
+  "symbolism": [
+   "revelation",
+   "divine nectar",
+   "immortality",
+   "prophetic inspiration"
+  ],
+  "sources": [
+   "Gathas (Avesta)",
+   "Rigveda (Soma hymns)",
+   "Zoroastrian Haoma ritual"
+  ],
+  "emblem": {
+   "form": "branching",
+   "accent": "#c2843c",
+   "juice": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Ephedra_distachya_%28with_cones%29_2011_1.jpg/500px-Ephedra_distachya_%28with_cones%29_2011_1.jpg",
+   "label": "Ephedra distachya",
+   "title": "Ephedra vulgaris"
+  }
+ },
+ {
+  "id": "yggdrasil",
+  "name": "Yggdrasil",
+  "native": "Ýggrasir",
+  "culture": "Norse / Germanic",
+  "region": "europe",
+  "era": "Mythic; sources 13th c. CE (Eddas)",
+  "type": "Cosmogonic world-tree",
+  "tree": "Ash (Fraxinus, 'world-ash')",
+  "story": "Yggdrasil, the immense ash, stands at the center of all things, its roots drinking from three sacred wells (Urd, Mimisbrunnr, Hvergelmir) and its branches spanning the nine worlds. The squirrel Ratatoskr carries insults between the eagle at the crown and the dragon Níðhöggr gnawing at the roots. The nornir dwell at the root, the world-serpent coils below, and the tree itself is the living axis of the cosmos.",
+  "history": "Yggdrasil is the most famous world-tree of the Indo-European West, recorded in the Poetic Edda (Völuspá) and Snorri Sturluson's Prose Edda (13th c.). It synthesizes older Germanic sacred-ash cults, the megalithic 'world pillar,' and the cosmographic tree that appears across Finno-Ugric, Slavic, and Baltic traditions. Its iconography survived in runestones and medieval woodwork.",
+  "details": "Yggdrasil is the paradigm axis mundi: a single organism connecting underworld, midworld, and heaven, with sacred animals at every level. It encodes the idea that the world is one living tree, that time (the norns, the dragon) gnaws at its base, and that even the cosmic tree faces a doom (Ragnarök) and renewal. It is the reference image for 'tree of life' in the modern imagination.",
+  "symbolism": [
+   "axis mundi",
+   "nine worlds",
+   "cosmic order",
+   "renewal after doom",
+   "sacred wells"
+  ],
+  "sources": [
+   "Poetic Edda, Völuspá",
+   "Prose Edda, Gylfaginning",
+   "Gokstad & Oseberg ship-burial art"
+  ],
+  "emblem": {
+   "form": "roots",
+   "accent": "#5b8f6f",
+   "wells": true,
+   "eagle": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/Fraxinus_excelsior.jpg/330px-Fraxinus_excelsior.jpg",
+   "label": "Fraxinus excelsior",
+   "title": "Fraxinus excelsior"
+  }
+ },
+ {
+  "id": "celtic-oak-dagda",
+  "name": "Oak of the Dagda (Aedh)",
+  "native": "Aed / Aith",
+  "culture": "Celtic / Irish",
+  "region": "europe",
+  "era": "Iron Age; medieval manuscripts (12th c. CE)",
+  "type": "Mythological tree / symbol of sovereignty",
+  "tree": "Oak (Quercus)",
+  "story": "The great god Dagda (the 'good god') is associated with the oak, the hazel of wisdom, and the cauldron of plenty. The oak is the tree of sovereignty, of the druids, and of the otherworld (Tír na nÓg). The hazel trees of wisdom drop nuts whose knowledge fills the Well of Segas; the oak shelters the druids' sacred groves and the seats of kings.",
+  "history": "Celtic sacred trees (oak, ash, hazel) are central to the mythology of Ireland, Wales, and Britain. The oak (Quercus) is the tree of the druids, of strength, and of the otherworld. The 'world tree' and the sacred grove (nemeton) are attested in Iron Age and classical sources (Caesar, Diodorus) and persist in the medieval Irish and Welsh romances.",
+  "details": "The Celtic grammar of the sacred tree is rich: oak = sovereignty and strength; hazel = wisdom; ash = the world pillar; apple = the otherworld. The tree is a portal to Tír na nÓg, a seat of kingship, and a font of druidic knowledge. It is the European 'tree of life' in its most mythologically dense form.",
+  "symbolism": [
+   "sovereignty",
+   "druidic wisdom",
+   "otherworld",
+   "strength"
+  ],
+  "sources": [
+   "Lebor Gabála Érenn",
+   "Cath Maige Tuired",
+   "Mabinogion (Welsh)"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#6b8f3e",
+   "acorns": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Quercus_robur.jpg/330px-Quercus_robur.jpg",
+   "label": "Oak",
+   "title": "Quercus"
+  }
+ },
+ {
+  "id": "slavic-world-tree",
+  "name": "World Tree of Perun (Oak)",
+  "native": "Мировое дерево / dąb Peruna",
+  "culture": "Slavic",
+  "region": "europe",
+  "era": "Pre-Christian; attested 10th-12th c. CE",
+  "type": "Cosmogonic world-tree / cult oak",
+  "tree": "Oak (Quercus)",
+  "story": "The Slavic world-tree (an oak, sacred to the storm-god Perun) stands at the center of the cosmos, its crown in the heavens of the gods, its trunk through the midworld, and its roots into the underworld (Nav). The tree is the axis connecting the three realms and the seat of divine thunder. The oak groves of the Slavs were centers of sacred law, oath, and sacrifice.",
+  "history": "Christian chronicles (e.g., the Tale of Bylina, the 'Perun' oak of Kiev) record that the Slavs worshipped the oak and the sacred grove. The world-tree motif is shared across Finno-Ugric, Baltic, and Slavic traditions, and the oak-god (Perun / Juras) parallels Zeus and Thor. The tree survived in folk custom as the 'grove' and the sacred oak.",
+  "details": "The Slavic world-tree is the Indo-European axis mundi in its eastern form: oak (thunder), three realms, and a divine center. It is the bridge between the Norse ash and the Iranian tree, and it anchors the whole 'tree of life' family in the Slavic and Baltic world.",
+  "symbolism": [
+   "axis mundi",
+   "three realms",
+   "storm/divine power",
+   "sacred law"
+  ],
+  "sources": [
+   "Bylina epic tradition",
+   "Kievan oak of Perun (chronicles)",
+   "Baltic & Finno-Ugric parallels"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#4f7d52",
+   "bolt": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Quercus_robur.jpg/330px-Quercus_robur.jpg",
+   "label": "Oak",
+   "title": "Quercus"
+  }
+ },
+ {
+  "id": "greek-hesperides",
+  "name": "Tree of the Hesperides (Golden Apples)",
+  "native": "Ἑσπερίδες / Hesperides",
+  "culture": "Greek / Mediterranean",
+  "region": "europe",
+  "era": "Homeric; codified 8th-5th c. BCE",
+  "type": "Mythological tree of immortality",
+  "tree": "Apple (golden)",
+  "story": "In the far west, beyond Oceanus, the Hesperides tend a tree (or grove) that bears golden apples of immortality. The tree was a wedding gift of Gaia to the goddess Hera, guarded by the serpent Ladon and later by Atlas. Herakles' eleventh labor is to fetch the golden apples — a quest for the fruit of eternal life.",
+  "history": "The Hesperides and their golden-apple tree appear in Homer's Odyssey and Iliad and in Hesiod's Theogony. The motif of the guarded tree of immortality in the far west is a classic Indo-European 'quest' and a likely source (or parallel) to the Eden and Gilgamesh 'plant of life' stories. The golden apple became a standard symbol of paradise and immortality in Greek and Roman art.",
+  "details": "The Hesperides' tree is the 'tree of immortality' in its purest Greek form: a guarded, western, golden tree whose fruit is eternal life. It is the archetype for every 'forbidden/guarded fruit of life' narrative and for the iconography of paradise (the golden apple, the serpent, the far west).",
+  "symbolism": [
+   "immortality",
+   "paradise",
+   "the guarded fruit",
+   "the far west"
+  ],
+  "sources": [
+   "Homer, Odyssey & Iliad",
+   "Hesiod, Theogony & Catalogue of Women",
+   "Apollodorus, Bibliotheca"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#d4a017",
+   "apples": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Pink_lady_and_cross_section.jpg/500px-Pink_lady_and_cross_section.jpg",
+   "label": "Apple",
+   "title": "Malus domestica"
+  }
+ },
+ {
+  "id": "greek-olive-athena",
+  "name": "Olive Tree of Athena",
+  "native": "ἐλαία / elaia",
+  "culture": "Greek / Roman",
+  "region": "europe",
+  "era": "Archaic; myth codified 8th-5th c. BCE",
+  "type": "Sacred city-tree / icon of civilization",
+  "tree": "Olive (Olea europaea)",
+  "story": "Athena and Poseidon competed for the patronage of the great city. Poseidon struck the rock and a spring of salt water gushed forth; Athena planted the first olive tree, giving the city food, oil, wood, and shade. The city took her name (Athens) and the olive became its sacred tree — a symbol of peace, wisdom, and civilization.",
+  "history": "The olive is the sacred tree of Attica and of Athena, attested from the Geometric period. The olive crown was awarded to victors at the Panathenaic Games and the Olympic Games. The olive branch is the ancient symbol of peace, and the 'olive of Athena' is one of the most enduring tree-symbols of Western culture.",
+  "details": "The olive encodes the tree of life as civilization: food, light (oil), and peace. It is the 'domesticated' tree of life — the tree that sustains a city and a way of life. Its iconography (the branch, the crown, the grove) is a direct line to the modern symbols of peace and prosperity.",
+  "symbolism": [
+   "peace",
+   "wisdom",
+   "civilization",
+   "prosperity"
+  ],
+  "sources": [
+   "Pausanias, Description of Greece",
+   "Panathenaic & Olympic records",
+   "Athenian coinage (olive sprig + owl)"
+  ],
+  "emblem": {
+   "form": "branching",
+   "accent": "#8a9a3e",
+   "branch": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/Olea_europaea_cuspidata-africana_Cape_Town.JPG/330px-Olea_europaea_cuspidata-africana_Cape_Town.JPG",
+   "label": "Olea europaea",
+   "title": "Olea europaea"
+  }
+ },
+ {
+  "id": "greek-dodona-oak",
+  "name": "Oak of Dodona (Zeus)",
+  "native": "δρυς Δωδώνη / drys Dodonē",
+  "culture": "Greek",
+  "region": "europe",
+  "era": "Archaic; oracle from 12th c. BCE",
+  "type": "Oracle tree / sacred grove",
+  "tree": "Oak (Quercus)",
+  "story": "At Dodona, the oldest Greek oracle, the wind spoke through the leaves of a great oak. Zeus's will was read in the rustling of the sacred grove; the priestess (the 'peepul' or the 'oak') interpreted the leaves' whispers. Two doves sent by Zeus chose the site, and the oak became the mouth of the storm-god.",
+  "history": "Dodona was Greece's first and oldest oracle, predating Delphi, and its sacred oak is the 'speaking tree' of Greek religion. The oak-god Zeus and his wind-reading tree are the direct ancestors of the sacred groves of Apollo and of the entire Mediterranean oracle tradition. The 'tree that speaks' is one of the oldest forms of the tree of life.",
+  "details": "The Dodona oak is the tree of prophecy: the leaves are the god's tongue. It anchors the 'sacred grove' as a site of divine speech and makes the tree a medium between the human and the divine — the tree of life as the voice of the cosmos.",
+  "symbolism": [
+   "prophecy",
+   "divine speech",
+   "sacred grove",
+   "storm-god"
+  ],
+  "sources": [
+   "Homer, Iliad (Dodekan)",
+   "Pausanias, Description of Greece",
+   "Dodona oracle records"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#5b7d3e",
+   "wind": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Quercus_robur.jpg/330px-Quercus_robur.jpg",
+   "label": "Oak",
+   "title": "Quercus"
+  }
+ },
+ {
+  "id": "kalpavriksha",
+  "name": "Kalpavriksha (Wish-Fulfilling Tree)",
+  "native": "कल्पवृक्ष / kalpavṛkṣa",
+  "culture": "Hindu / Indian",
+  "region": "south-asia",
+  "era": "Vedic; codified in Puranas (1st millennium CE)",
+  "type": "Cosmogonic / wish-fulfilling tree",
+  "tree": "Vatana (banyan) / wish-fulfilling tree",
+  "story": "The Kalpavriksha stands in the garden of the gods (the paradise of Indra) and grants the wishes of whoever approaches it. It bears every fruit, flower, and jewel; it is the source of all prosperity and the object of pilgrimage. In the Ramayana, Sita plants a wish-fulfilling tree in the Ashoka grove of Lanka, and the tree becomes a symbol of the paradise restored.",
+  "history": "The Kalpavriksha is a central Puranic and Vedic concept — the tree that fulfills every desire. It appears in the Vishnu Purana, the Bhagavata Purana, and the Ramayana. Its iconography (a jeweled tree in a paradisiacal garden) became a standard motif of Indian painting and temple sculpture, and it is the direct ancestor of the 'tree of paradise' in South and Southeast Asian art.",
+  "details": "The Kalpavriksha is the 'tree of life' as abundance: the source of every desire, every season, and every blessing. It is the cosmic garden's heart, the axis of prosperity, and the prototype of the paradise-tree that traveled with Buddhism and Hinduism across Asia.",
+  "symbolism": [
+   "abundance",
+   "wish-fulfillment",
+   "paradise",
+   "cosmic prosperity"
+  ],
+  "sources": [
+   "Vishnu Purana",
+   "Bhagavata Purana",
+   "Ramayana (Ashoka grove)"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#d4763c",
+   "jewels": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/Great_banyan_tree_kol.jpg/330px-Great_banyan_tree_kol.jpg",
+   "label": "Ficus benghalensis",
+   "title": "Ficus benghalensis"
+  }
+ },
+ {
+  "id": "bodhi-tree",
+  "name": "Bodhi Tree (Ashvattha / Pippala)",
+  "native": "बोधिवृक्ष / bodhivṛkṣa",
+  "culture": "Buddhist / Indian",
+  "region": "south-asia",
+  "era": "6th c. BCE (Buddha's awakening)",
+  "type": "Sacred enlightenment tree",
+  "tree": "Pippal / Peepal (Ficus religiosa)",
+  "story": "Beneath a pippal (bodhi) tree in Bodh Gaya, the prince Siddhartha Gautama sat and resolved not to rise until he had awakened. There, through the night, he attained enlightenment (bodhi) and became the Buddha. The tree became the tree of awakening, and its leaves and shade are the enduring symbol of liberation, wisdom, and the path to enlightenment.",
+  "history": "The original bodhi tree is said to have been planted in the 3rd c. BCE (from a cutting of the original) and stands today in Anuradhapura, Sri Lanka (Sri Maha Bodhi), one of the oldest continuously tended trees in the world. The bodhi tree became the central icon of Buddhist art across Asia — the tree under which the Buddha sits, the tree of the stupa, and the tree of the mandala.",
+  "details": "The bodhi tree is the 'tree of life' as awakening: the organism under which ignorance ends and wisdom begins. It encodes the tree as the seat of liberation, the source of insight, and the living teacher. Its iconography (Buddha under a heart-shaped-canopied tree) is the most recognizable 'tree of life' in the Buddhist world.",
+  "symbolism": [
+   "enlightenment",
+   "liberation",
+   "wisdom",
+   "the path"
+  ],
+  "sources": [
+   "Buddha's awakening at Bodh Gaya",
+   "Dhammakapiya / Jataka tales",
+   "Sri Maha Bodhi, Anuradhapura"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#4f7d52",
+   "heart": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Ficus_religiosa_Bo.jpg/500px-Ficus_religiosa_Bo.jpg",
+   "label": "Ficus religiosa",
+   "title": "Ficus religiosa"
+  }
+ },
+ {
+  "id": "ashvattha-gita",
+  "name": "Ashvattha of the Bhagavad Gita",
+  "native": "अश्वत्थ / aśvattha",
+  "culture": "Hindu / Indian",
+  "region": "south-asia",
+  "era": "2nd c. BCE (Gita) onward",
+  "type": "Scriptural / cosmogonic tree",
+  "tree": "Ashvattha (Ficus religiosa, sacred fig)",
+  "story": "In the Bhagavad Gita (15.1-6), Krishna describes the eternal tree of existence: an ashvattha whose roots reach up (into the spirit) and whose branches reach down (into the world), whose leaves are the Vedic hymns. This tree is the tree of samsara — the world of birth and death. One must cut this tree with the 'axe of non-attachment' to reach the supreme abode from which, once attained, one is never again born.",
+  "history": "The Gita's ashvattha is one of the most philosophically dense tree-images in world literature. It inverts the 'tree of life' into the 'tree of bondage' — the organism of cyclic existence that must be cut through to reach liberation. It is a direct counter-image to the Kalpavriksha and a key text for the Indian 'tree of life' tradition.",
+  "details": "The ashvattha of the Gita is the tree of life as samsara: the inverted tree of desire and rebirth. Its 'upward roots, downward branches' and 'Vedic leaves' make it a cosmological map. It is the 'tree of life' turned into a map of bondage and the discipline needed to transcend it.",
+  "symbolism": [
+   "samsara",
+   "bondage",
+   "non-attachment",
+   "the inverted cosmos"
+  ],
+  "sources": [
+   "Bhagavad Gita 15.1-6",
+   "Brihadaranyaka Upanishad (ashvattha)"
+  ],
+  "emblem": {
+   "form": "roots",
+   "accent": "#8a5a3b",
+   "inverted": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Ficus_religiosa_Bo.jpg/500px-Ficus_religiosa_Bo.jpg",
+   "label": "Ficus religiosa",
+   "title": "Ficus religiosa"
+  }
+ },
+ {
+  "id": "ashoka-indian",
+  "name": "Ashoka Tree (Indian / Buddhist)",
+  "native": "अशोक / aśoka",
+  "culture": "Buddhist / Indian",
+  "region": "south-asia",
+  "era": "3rd c. BCE (Ashoka) onward",
+  "type": "Sacred / memorial tree",
+  "tree": "Ashoka (Sapindus emarginatus / Saraca)",
+  "story": "The Ashoka tree (the 'tree without sorrow') is the tree of the Emperor Ashoka and of the Buddhist paradise. It is the tree under which the Buddha's mother, Queen Maya, conceived him (in Jataka tradition), and it marks the sites of the Buddha's miracles. Its blossoms (a cascade of red-orange) are the flower of the 'paradise without sorrow' that bears the emperor's name.",
+  "history": "The Ashoka tree is a shared sacred motif of Zoroastrian, Indian, and Buddhist traditions. In Buddhist art it is the 'tree of the miracle' and the 'paradise tree,' appearing in the stupa and in the garden of the Buddha's mother. Its name (a-soka, 'without sorrow') and its image traveled with Buddhism across Asia, becoming a standard icon of the paradise-tree.",
+  "details": "The Ashoka is the 'tree of life' as the paradise without sorrow: the tree of the miracle, the tree of the Buddha's mother, and the tree of the emperor's renunciation. It is a key node in the cross-cultural genealogy of the paradise-tree, linking the Iranian, Indian, and Buddhist traditions.",
+  "symbolism": [
+   "without sorrow",
+   "paradise",
+   "miracle",
+   "renunciation"
+  ],
+  "sources": [
+   "Jataka tales (Maya's conception)",
+   "Buddhist stupa iconography",
+   "Emperor Ashoka's edicts"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#c2543c",
+   "cascade": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Ashoka_Flower.jpg/500px-Ashoka_Flower.jpg",
+   "label": "Saraca",
+   "title": "Saraca"
+  }
+ },
+ {
+  "id": "tala-nirvana",
+  "name": "Tala (Palm) of Nirvana",
+  "native": "तल / tala",
+  "culture": "Buddhist",
+  "region": "south-asia",
+  "era": "5th c. BCE (Buddha's parinirvana)",
+  "type": "Sacred / memorial tree",
+  "tree": "Tala / Palm (Borassus flabellifer)",
+  "story": "Between two sal-trees (or, in some traditions, two tala palms) at Kusinara, the Buddha attained parinirvana — his final passing beyond the cycle of rebirth. The tree marks the endpoint of the path, the place where the last of the Buddha's existences ended. The sal and tala become the 'trees of the final release.'",
+  "history": "The tala/sal of the Buddha's parinirvana is one of the four great sacred sites of Buddhism (Lumbini, Bodh Gaya, Sarnath, Kusinara). The 'tree of nirvana' is a standard icon of Buddhist art — the sal grove of the passing, the tree that marks the end of samsara. It completes the Buddhist tree-cycle: the bodhi (awakening) and the tala (release).",
+  "details": "The tala is the 'tree of life' as release: the organism that marks the end of the cycle of birth and death. It is the complement to the bodhi tree — the tree of awakening (the beginning of the path) and the tree of nirvana (the end of the path). Together they enclose the whole Buddhist journey.",
+  "symbolism": [
+   "nirvana",
+   "release",
+   "the end of the path",
+   "final passing"
+  ],
+  "sources": [
+   "Mahaparinibbana Sutta",
+   "Kusinara stupa",
+   "Buddhist stupa iconography"
+  ],
+  "emblem": {
+   "form": "frond",
+   "accent": "#c2843c",
+   "fronds": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Borassus_flabellifer.jpg/500px-Borassus_flabellifer.jpg",
+   "label": "Borassus flabellifer",
+   "title": "Borassus flabellifer"
+  }
+ },
+ {
+  "id": "pippal-banyan",
+  "name": "Banyan of the Vedic World (Vat)",
+  "native": "वट / vata",
+  "culture": "Hindu / Indian",
+  "region": "south-asia",
+  "era": "Vedic period (1500-500 BCE)",
+  "type": "Cosmogonic / sacred tree",
+  "tree": "Banyan (Ficus benghalensis)",
+  "story": "The banyan (vat) is the 'tree of the world' in Vedic and Hindu tradition — the vast, spreading tree whose aerial roots become new trunks, so that one tree is a grove. It is the tree of the world-tree, the organism that contains the whole cosmos in its spreading canopy and root-network. It is the 'world tree' of the Indian subcontinent.",
+  "history": "The banyan is the national and sacred tree of India, attested from the Vedic period. Its 'one tree, many trunks' morphology made it the natural image of the world-tree, the mandala, and the cosmic order (rita). It is the living icon of the 'tree that is the world,' and it anchors the Indian world-tree tradition.",
+  "details": "The banyan is the 'tree of life' as the world itself: the organism whose spreading roots and canopies are a map of the cosmos. It is the Indian axis mundi, the tree that contains heaven and earth in its body, and the living prototype of the mandala and the world-tree.",
+  "symbolism": [
+   "the world as tree",
+   "mandala",
+   "cosmic order (rita)",
+   "expansion"
+  ],
+  "sources": [
+   "Rigveda (vat)",
+   "Vishnu Purana",
+   "Indian temple art (banyan as world-tree)"
+  ],
+  "emblem": {
+   "form": "multi",
+   "accent": "#4f7d52",
+   "roots": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Great_banyan_tree_kol.jpg/500px-Great_banyan_tree_kol.jpg",
+   "label": "Ficus benghalensis",
+   "title": "Ficus benghalensis"
+  }
+ },
+ {
+  "id": "mango-hindu",
+  "name": "Mango Tree of the Gods",
+  "native": "आम्र / āmra",
+  "culture": "Hindu / Indian",
+  "region": "south-asia",
+  "era": "Vedic; codified in Puranas",
+  "type": "Sacred / abundance tree",
+  "tree": "Mango (Mangifera indica)",
+  "story": "The mango is the 'king of fruits' and the tree of abundance in Hindu tradition. It is the tree of the gods' garden, the tree of love (associated with the god of love, Manmatha), and the tree of the harvest. Its fruit is the offering, its shade the refuge, and its blossom the flower of prosperity and love.",
+  "history": "The mango is the sacred and national fruit-tree of India, attested from the Vedic period and central to Hindu ritual and art. It is the tree of abundance, the tree of love, and the 'tree of life' as nourishment and fertility. Its iconography (the mango grove, the offering of the fruit) is a standard of Indian painting.",
+  "details": "The mango is the 'tree of life' as nourishment and love: the tree of the harvest, the tree of the gods, and the tree of the beloved. It encodes the tree as the source of the body's sustenance and of the heart's desire — the 'tree of life' in its most sensual and domesticated form.",
+  "symbolism": [
+   "abundance",
+   "love",
+   "fertility",
+   "the harvest"
+  ],
+  "sources": [
+   "Vedic hymns (āmrā)",
+   "Puranic tradition",
+   "Indian miniature painting (mango groves)"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#d4763c",
+   "fruit": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e3/Mangoes_%28Magnifera_indica%29_from_India.jpg/330px-Mangoes_%28Magnifera_indica%29_from_India.jpg",
+   "label": "Mangifera indica",
+   "title": "Mangifera indica"
+  }
+ },
+ {
+  "id": "soma-vedic",
+  "name": "Soma Tree (Vedic)",
+  "native": "सोम / soma",
+  "culture": "Vedic / Indian",
+  "region": "south-asia",
+  "era": "Vedic period (1500-500 BCE)",
+  "type": "Ritual / nectar tree",
+  "tree": "Soma (possibly ephedra or a sacred shrub)",
+  "story": "Soma is the sacred, life-giving plant of the Vedic ritual, whose pressed juice (soma) is drunk by the priests to grant vitality, inspiration, and immortality. The god Soma is the divine source of the nectar, and the 'tree' of soma is the source of the gods' vitality and of the prophet's revelation. It is the Indian counterpart of the Iranian Haoma.",
+  "history": "Soma is central to the Rigveda (the Soma hymns) and is the Vedic counterpart of the Iranian Haoma. Its ritual pressing and drinking is one of the oldest continuous liturgical acts in the Indian world. The plant's identity is debated (ephedra, or a lost species), but its role as the divine tree of nectar and revelation is unambiguous.",
+  "details": "As the 'tree of nectar,' Soma/Haoma links the tree of life to revelation, inspiration, and divine vitality — a theme echoed across the Indo-European world (the Greek kykeon, the Norse mead of poetry, the Christian Eucharist). It is the tree that gives humans the gods' own life.",
+  "symbolism": [
+   "divine nectar",
+   "revelation",
+   "vitality",
+   "ritual"
+  ],
+  "sources": [
+   "Rigveda (Soma hymns)",
+   "Vedic ritual texts (Sutra)"
+  ],
+  "emblem": {
+   "form": "branching",
+   "accent": "#c2843c",
+   "juice": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c1/Peganum_harmala_kz02.jpg/330px-Peganum_harmala_kz02.jpg",
+   "label": "Peganum harmala",
+   "title": "Peganum harmala"
+  }
+ },
+ {
+  "id": "xiwangmu-peach",
+  "name": "Peach Tree of the Queen Mother of the West",
+  "native": "西王母桃樹 · xī wángmǔ táo shù",
+  "culture": "Chinese",
+  "region": "east-asia",
+  "era": "Zhou dynasty sources (1st millennium BCE); Han codification",
+  "type": "Immortal / longevity tree",
+  "tree": "Peach (Prunus persica)",
+  "story": "On Mount Yaoqi in the western reaches, the Queen Mother of the West (Xiwangmu) keeps a garden of three peach trees. Each tree bears fruit only once every three thousand years, and a single bite of the golden peach grants immortality. When the immortal Zhongli Qu, who had already eaten three peaches in a lifetime, sneaks back for a fourth, the Queen Mother exposes him, and he withers to an infant in her court.",
+  "history": "Xiwangmu first appears in the Zhou-dynasty text Mountain and Sea Classic (Shan Hai Jing) as a half-human, half-beast guardian, and by the Han dynasty she had become a fully divine matriarch of the immortal isles. The peach became China's foremost longevity symbol: the 'peach banquet' (taohui) celebrating a long-lived elder is still the standard birthday honor for the elderly, and peaches are the default offering at longevity festivals.",
+  "details": "The three thousand-year fruiting cycle encodes a cosmology of time: the mortal realm ages in years while the immortal garden ages in epochs. Peaches are also apotropaic — door gods hold them, and the peach-blossom sword is the archetypal weapon against ghosts. The fruit's duality (immortality and exorcism) makes the peach tree the most functional sacred tree in Chinese religion.",
+  "symbolism": [
+   "immortality",
+   "longevity",
+   "fertility",
+   "protection against ghosts"
+  ],
+  "sources": [
+   "Shan Hai Jing (Mountain and Sea Classic), esp. Guo Zhu's 3rd-c. commentary",
+   "Legge, James. The Mountains and Seas (1882 translation)",
+   "Mair, Victor H. The Mountain and Sea Classics (1993)"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#c2543c",
+   "fruit": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Illustration_Prunus_persica_clean_no_descr.jpg/330px-Illustration_Prunus_persica_clean_no_descr.jpg",
+   "label": "Peach",
+   "title": "Prunus persica"
+  }
+ },
+ {
+  "id": "jing-tree",
+  "name": "Jing, the Axis Tree of Heaven",
+  "native": "景樹 · jǐng shù",
+  "culture": "Chinese",
+  "region": "east-asia",
+  "era": "Pre-Qin sources; attested in Shan Hai Jing",
+  "type": "Cosmic axis-mundi tree",
+  "tree": "Unspecified (described as radiant, luminous)",
+  "story": "In the oldest Chinese cosmography, a great luminous tree called the Jing stands at the navel of the world. The sun, the moon, and the stars circle or ascend it; the gods gather beneath it, and the emperor's capital is said to mirror its axis. It is the tree through which the celestial and the terrestrial realms are joined — the original Chinese world tree, preceding the later Meru-derived imagery of Buddhism.",
+  "history": "The Jing appears in early chapters of the Shan Hai Jing, where it is associated with the sun god and with the emperor's sacred precincts. Later Han and Tang ritual commentaries identified it with the 'central tree' of the imperial capital — the axis about which the palace grid was oriented. When Buddhist Mount Meru entered Chinese cosmology from the 4th century, the Jing's role as vertical axis was largely absorbed into the Meru image, but the word survived in ritual and poetic registers.",
+  "details": "Unlike the more narrative trees of Chinese myth, the Jing is pure structure: it is the axis mundi itself. Its name is etymologically linked to 'jing' meaning splendor and to the sun's brightness, which is why the tree is described as radiant even before the sun reaches it. It is the closest Chinese parallel to Yggdrasil in function — the pillar that holds heaven, earth, and the underworld in one column.",
+  "symbolism": [
+   "axis mundi",
+   "cosmic order",
+   "imperial center",
+   "radiance"
+  ],
+  "sources": [
+   "Shan Hai Jing (Mountain and Sea Classic)",
+   "Mair, Victor H. The Mountain and Sea Classics (1993)",
+   "Saso, Michael. The Tree of God in Chinese Mythology (study of jing cosmography)"
+  ],
+  "emblem": {
+   "form": "conical",
+   "accent": "#d4a017",
+   "star": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Cinnamomum_camphora20050314.jpg/330px-Cinnamomum_camphora20050314.jpg",
+   "label": "Camphora officinarum",
+   "title": "Cinnamomum camphora"
+  }
+ },
+ {
+  "id": "jade-tree",
+  "name": "Jade Tree of the Immortal Isles",
+  "native": "玉樹 · yù shù",
+  "culture": "Chinese",
+  "region": "east-asia",
+  "era": "Zhou–Han period sources",
+  "type": "Immortal tree",
+  "tree": "Jade / crystal (mythic material, not a species)",
+  "story": "In the islands of the eastern sea where immortals dwell, trees grow of living jade: their branches are polished emerald, their fruit pearls and jade seeds. To eat a single fruit is to shed the mortal body. Wanderers who stumble on the isles — fishermen, shipwrecked officials — are tempted, and those who eat the jade fruit are never seen in the mortal world again.",
+  "history": "The jade tree (yushu) recurs in Han dynasty immortality literature and in the Shan Hai Jing's accounts of the eastern sea isles. 'Jade tree' also became a fixed literary and artistic formula — a phrase for any tree of supernatural beauty in poetry, and a standard motif in Tang and Song painting of immortal landscapes. The material matters: jade was the substance of incorruptibility in Chinese belief, so a tree of it is a tree that cannot decay.",
+  "details": "Where the peach tree of Xiwangmu grants life through fruit eaten in time, the jade tree grants it through substance itself — the whole tree is immortal because it is made of the incorruptible mineral. It sits at the other end of Chinese immortal botany: not a tree that gives life, but a tree that is already life made solid. The motif survives in the phrase 'jade tree and jade stone' for refined, otherworldly beauty.",
+  "symbolism": [
+   "incorruptibility",
+   "immortality",
+   "refined beauty",
+   "the eastern sea of immortals"
+  ],
+  "sources": [
+   "Shan Hai Jing (Mountain and Sea Classic)",
+   "Mair, Victor H. The Mountain and Sea Classics (1993)",
+   "Standard Tang/Song painting motif catalogues"
+  ],
+  "emblem": {
+   "form": "branching",
+   "accent": "#5b8f6f",
+   "jewels": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Flickr_-_archer10_%28Dennis%29_-_Guatemala-1376.jpg/500px-Flickr_-_archer10_%28Dennis%29_-_Guatemala-1376.jpg",
+   "label": "Pachira aquatica",
+   "title": "Pachira aquatica"
+  }
+ },
+ {
+  "id": "penglai",
+  "name": "Longevity Trees of Penglai",
+  "native": "蓬萊長生樹 · pénglái chángshēng shù",
+  "culture": "Chinese",
+  "region": "east-asia",
+  "era": "Qin–Han (seeking by Qin Shi Huang, 3rd c. BCE onward)",
+  "type": "Paradise-island tree",
+  "tree": "Mixed immortal flora (peach, jade, and unnamed changsheng trees)",
+  "story": "Penglai, one of the three great islands floating in the eastern sea, is home to the Queen Mother's kin and to trees of endless life (changsheng shu). Emperor Qin Shi Huang, terrified of death, dispatched the envoy Xu Fu with thousands of youths and maidens to sail east and find the islands' fruit that would make him immortal. Xu Fu never returned. The search set a pattern: every Han emperor after him sent expeditions east for the same trees.",
+  "history": "Penglai's fame is fixed by the Qin and Han imperial searches recorded by Sima Qian (Records of the Grand Historian). The islands' location kept receding as sailors approached — a narrative device encoding their otherworldliness. The longing for Penglai became a whole genre of Chinese poetry and landscape painting, and the name Penglai (a real coastal city) carried the myth into place-names across the northern coast.",
+  "details": "The changsheng shu ('long-life tree') is a category, not a species — anything that does not die. The island's trees are the destination of the most famous imperial quest in Chinese history, which is why Penglai sits at the center of the immortality imagination. The myth also seeded the Japanese and Korean 'island of the immortals' (shinsen / shinsan) traditions, traveling with maritime contact.",
+  "symbolism": [
+   "immortality sought",
+   "the receding horizon",
+   "imperial ambition",
+   "eastern sea"
+  ],
+  "sources": [
+   "Sima Qian, Records of the Grand Historian (Shiji), ch. 28",
+   "Mair, Victor H. The Mountain and Sea Classics (1993)"
+  ],
+  "emblem": {
+   "form": "multi",
+   "accent": "#3f6f8f",
+   "fronds": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/92/Illustration_Prunus_persica_clean_no_descr.jpg/330px-Illustration_Prunus_persica_clean_no_descr.jpg",
+   "label": "Peach",
+   "title": "Prunus persica"
+  }
+ },
+ {
+  "id": "sun-god-nagi",
+  "name": "Sacred Nagi of the Sun Shrine",
+  "native": "神渕の杜 · kamiizumi no mori; 神木 · kamiboki",
+  "culture": "Japanese (Shinto)",
+  "region": "east-asia",
+  "era": "Mythic antiquity; shrine rebuilt every 20 years since at least the 7th c. CE",
+  "type": "Shrine sacred tree",
+  "tree": "Nagi (Machilus thunbergii, a laurel)",
+  "story": "At Ise, the inner shrine of Amaterasu (the sun goddess) is surrounded by a grove of sacred nagi trees, and a single great nagi stands as the kami's dwelling-tree. Every twenty years the entire shrine — and the grove's central tree — is ceremonially rebuilt in an identical copy (shikinen sengu). The tree is not worshipped as an object but treated as the living presence of the goddess's dwelling, renewed in perpetuity so that the shrine never grows old.",
+  "history": "The Ise shrines' ritual of periodic rebuilding (shikinen sengu) is the oldest continuously practiced ritual in the world, running unbroken for over a thousand years. The nagi was chosen as the sacred species of the shrine: it is evergreen, aromatic, and its wood was used for the shrine's most sacred components. The practice encodes a theology of perpetual renewal — the sacred is kept alive by being constantly recreated, never allowed to fossilize into a monument.",
+  "details": "The nagi's role is architectural as much as spiritual: it is the tree that houses the deity. Its aromatic wood was believed to ward off decay and evil, which is why it was used for the shrine's sacred objects. The twenty-year cycle makes the nagi a living metronome of the shrine's time — each generation of Japanese knows the grove as newly planted, so the sacred tree is forever young.",
+  "symbolism": [
+   "perpetual renewal",
+   "dwelling of the kami",
+   "evergreen sanctity",
+   "cyclical time"
+  ],
+  "sources": [
+   "Ise Jingu official ritual records (shikinen sengu)",
+   "Pott, John. The Ise Shrines and Shikinen Sengu (study of the renewal ritual)"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#4f7d52",
+   "bands": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/M_thunbergii.JPG/330px-M_thunbergii.JPG",
+   "label": "Machilus",
+   "title": "Machilus"
+  }
+ },
+ {
+  "id": "isonokami-fig",
+  "name": "Sacred Fig of Isonokami",
+  "native": "伊佐那岐の樹 · isonokami no ki",
+  "culture": "Japanese (Shinto)",
+  "region": "east-asia",
+  "era": "Mythic antiquity; shrine attested by 8th c. CE (Kojiki, Nihon Shoki)",
+  "type": "Descent / foundation tree",
+  "tree": "Sacred fig (ichii / Ficus)",
+  "story": "When the sun goddess Amaterasu left the Heavenly Plain to found the realm of mortals, she alighted upon a great fig tree on the island of Izumo, where the deity Isonokami awaited her. That tree — the isonokami — marks the exact spot where the divine descended to earth, and it became the most sacred fig in Japan. To stand beneath it is to stand at the hinge between the heavenly and the human worlds.",
+  "history": "The descent of Amaterasu onto the fig at Isonokami is recorded in the two oldest Japanese chronicles, the Kojiki (712) and the Nihon Shoki (720). The site at Kashima / Izumo became a major shrine, and the sacred fig (ichii) was recognized across Japan as a tree of divine descent and of the founding of place. Figs in general became associated with the establishment of sacred ground — a fig marks where a kami has landed.",
+  "details": "The fig's role is locative: it fixes the myth in a place. Unlike the nagi that houses the deity in a shrine, the isonokami fig marks the moment the deity left the sky. It is the tree of foundation — the point of contact between the celestial and the terrestrial — which is why figs so often stand at the centers of Japanese sacred sites and at the roots of shrine groves.",
+  "symbolism": [
+   "divine descent",
+   "foundation of place",
+   "heaven–earth hinge",
+   "sacred ground"
+  ],
+  "sources": [
+   "Kojiki (712), Nihon Shoki (720) — descent narratives",
+   "Standard Shinto shrine-tree catalogues (ichii as sacred fig)"
+  ],
+  "emblem": {
+   "form": "roots",
+   "accent": "#7b4b2a",
+   "roots": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Sycomoros_old.jpg/330px-Sycomoros_old.jpg",
+   "label": "Ficus",
+   "title": "Ficus"
+  }
+ },
+ {
+  "id": "dado-world-tree",
+  "name": "Dado, the World Tree of Heaven",
+  "native": "다도 · Dado",
+  "culture": "Korean",
+  "region": "east-asia",
+  "era": "Pre-Buddist Korean cosmology; attested in early mythic sources",
+  "type": "Cosmic axis-mundi tree",
+  "tree": "Unspecified great tree (described as spanning heaven, earth, and underworld)",
+  "story": "In the oldest Korean cosmology, a colossal tree called Dado stands at the center of the world. Its crown reaches the heavens, its trunk passes through the earth, and its roots plunge into the underworld. The three realms — heaven, the human world, and the realm of the dead — are the three levels of a single tree, and the spirits of the dead climb its roots while the gods dwell in its branches. It is the original Korean axis mundi, the pillar that holds the cosmos upright.",
+  "history": "Dado appears in pre-Budd Korean creation and cosmological traditions and in the mythology surrounding the founding of the Korean people. When Buddhism arrived (4th–6th c. CE), the image of Dado was partially fused with the Buddhist Mount Meru and with the Bodhi tree of enlightenment, but the native Dado survived in folk cosmology, in the ritual language of shamans (mudang), and in the imagery of Korean shamanism as the tree connecting the three worlds.",
+  "details": "Dado's function is purely structural — it is the tree that makes the three realms into one connected place. Its roots in the underworld and crown in heaven make it the elevator between life and death, which is why Korean shamanic ritual so often invokes climbing or descending a great tree to carry messages between the living and the dead. It is the Korean counterpart to Yggdrasil and the Mesoamerican ceiba.",
+  "symbolism": [
+   "axis mundi",
+   "three realms",
+   "life–death passage",
+   "cosmic pillar"
+  ],
+  "sources": [
+   "Korean shamanic (mudang) ritual tradition",
+   "Studies of pre-Buddhist Korean cosmology and Dado myth"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#7a4f8f",
+   "star": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Eucalyptus_tereticornis_flowers%2C_capsules%2C_buds_and_foliage.jpeg/330px-Eucalyptus_tereticornis_flowers%2C_capsules%2C_buds_and_foliage.jpeg",
+   "label": "Eucalyptus",
+   "title": "Eucalyptus"
+  }
+ },
+ {
+  "id": "champa-samye",
+  "name": "Champa Tree of the Samye Dream",
+  "native": "ཇམ་པའི་མེ་ཏོག · jampa'i metok; 金盞花 · jīnzhǎnhuā",
+  "culture": "Tibetan",
+  "region": "east-asia",
+  "era": "8th century CE (Trisong Detsen's era, c. 750–797)",
+  "type": "Prophetic / consecration tree",
+  "tree": "Champa / cempaka (Michelia champaca)",
+  "story": "King Trisong Detsen, founder of Tibetan Buddhism, dreamed of a great champa tree in full bloom on a hill above the future site of Samye, the first monastery in Tibet. In the dream, the tree's fragrance announced that the Indian masters who would bring the Dharma were already on their way. When the Indian pandits Sarodharma and Vairotsana arrived and the monastery was built, the champa tree was said to bloom out of season in confirmation of the dream — the tree became the living seal that the prophecy was true.",
+  "history": "The champa (cempaka) tree was already sacred in Indian and Southeast Asian tradition as a tree of fragrance and of the gods. In the Samye narrative it becomes the botanical proof of prophecy — a tree that blooms on the king's command to validate the arrival of Buddhism. The dream-and-blossom story is a founding text of Tibetan monastic history and is still retold at Samye. The champa remains a flower of high sanctity in Tibetan ritual garlands (phundru).",
+  "details": "The champa's power here is olfactory and prophetic: its fragrance is the sign, and its out-of-season bloom is the miracle. It is less a world tree than a verification tree — a plant that testifies. That is why the cempaka/champa appears so often in Himalayan ritual as the flower of consecration: it is the tree that confirms the sacred has arrived.",
+  "symbolism": [
+   "prophecy fulfilled",
+   "consecration",
+   "fragrance as sign",
+   "arrival of the Dharma"
+  ],
+  "sources": [
+   "Tibetan monastic histories of Samye (e.g., the bKa'-'gyur founding texts)",
+   "Studies of Trisong Detsen and the introduction of Buddhism to Tibet"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#d4763c",
+   "fruit": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Michelia_champaca_Blanco1.191-cropped.jpg/330px-Michelia_champaca_Blanco1.191-cropped.jpg",
+   "label": "Magnolia champaca",
+   "title": "Michelia champaca"
+  }
+ },
+ {
+  "id": "mongol-ukhai",
+  "name": "Ukhai, the Sacred Tree of the Steppe",
+  "native": "ухай · ukhai (sacred tree)",
+  "culture": "Mongolian",
+  "region": "east-asia",
+  "era": "Shamanic antiquity; continuous to present",
+  "type": "Village / clan sacred tree",
+  "tree": "Usually oak, elm, or poplar (whatever great tree the clan chose)",
+  "story": "Every Mongol clan and many steppe villages keep an ukhai — a single great tree set apart as the dwelling of the clan's spirit and the axis of its territory. Riders dismount and circle it; offerings of silk (khadag) are tied to its branches; and the tree's health is read as the health of the clan. To cut an ukhai is the gravest of desecrations, an offense against the clan's own spirit.",
+  "history": "The ukhai tradition is a core institution of pre-Buddhist Mongol shamanism and survives alongside (and often beneath) the later Buddhist layer. It is the steppe expression of a very wide Eurasian pattern — the sacred tree as clan axis — seen also among the Turkic and Tungus peoples. Even after the mass conversion to Buddhism and then to state atheism, the ukhai persisted in rural practice, and today it is a visible part of the steppe landscape and of revived shamanic ceremony.",
+  "details": "The ukhai is a territorial and genealogical marker as much as a spiritual one: it defines where the clan's spirit lives and therefore where the clan's land begins. Its branches, heavy with blue silk scarves, are a recognizable sight across Mongolia. The tree is the clan's living ancestor, the fixed point around which the mobile steppe life organizes itself.",
+  "symbolism": [
+   "clan spirit",
+   "territorial axis",
+   "genealogy",
+   "the fixed point of the steppe"
+  ],
+  "sources": [
+   "Mongol shamanic (böö) tradition",
+   "Ethnographic studies of Mongol sacred trees (ukhai) and steppe ritual"
+  ],
+  "emblem": {
+   "form": "branching",
+   "accent": "#8a9a3e",
+   "bands": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/34/Lapo_gyslos.jpeg/330px-Lapo_gyslos.jpeg",
+   "label": "Populus",
+   "title": "Populus"
+  }
+ },
+ {
+  "id": "ryukyu-kuyaa",
+  "name": "Kuyaa, the Sacred Tree of the Ryukyuan Villages",
+  "native": "クヤ · kuyaa (sacred tree)",
+  "culture": "Ryukyuan (Okinawan)",
+  "region": "east-asia",
+  "era": "Ryukyu Kingdom period (15th–19th c.); continuous to present",
+  "type": "Village sacred tree",
+  "tree": "Varies — often camphor, banyan, or a great native tree",
+  "story": "In the villages of the Ryukyu islands, a chosen great tree is the kuyaa — the dwelling-place of the village's guardian spirit (the mifu or a local kami) and the axis of the community's ritual life. Before harvests, before building, and before any communal undertaking, the villagers offer rice, sake, and prayers at the kuyaa. The tree is the village's spiritual elder, the one whose blessing makes the community's work lawful.",
+  "history": "The kuyaa is a central feature of Ryukyuan (Okinawan) indigenous religion, which retained a strong animist and spirit-dwelling layer even under the later Confucian and Japanese influences of the Ryukyu Kingdom. The tradition is part of the broader East Asian pattern of the village sacred tree, and in Okinawa it survives as a living practice: many villages still maintain a kuyaa and hold offerings at it. The Okinawan concept of the sacred tree is closely tied to the idea of the 'sacred grove' (the mifu's domain) at the village edge.",
+  "details": "The kuyaa is a community tree, not an individual's — it belongs to the village and its guardian spirit. Its role is to mediate between the human community and the spirit world, making the village's collective actions ritually valid. It is the Okinawan counterpart to the Mongol ukhai and the Vietnamese village banyan: the tree that anchors a community's spirit to a place.",
+  "symbolism": [
+   "village spirit",
+   "communal blessing",
+   "spirit dwelling",
+   "ritual validity"
+  ],
+  "sources": [
+   "Ryukyuan (Okinawan) indigenous religious tradition (mifu and kuyaa)",
+   "Ethnographic studies of Okinawan village sacred trees"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#5b7d3e",
+   "fruit": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ae/Cinnamomum_camphora20050314.jpg/330px-Cinnamomum_camphora20050314.jpg",
+   "label": "Camphora officinarum",
+   "title": "Cinnamomum camphora"
+  }
+ },
+ {
+  "id": "vietnam-banyan",
+  "name": "Cây Đa, the Sacred Banyan of the Village",
+  "native": "cây đa · the great banyan",
+  "culture": "Vietnamese",
+  "region": "southeast-asia",
+  "era": "Ancient; continuous to present",
+  "type": "Village sacred tree",
+  "tree": "Banyan (Ficus benghalensis / Ficus microcarpa)",
+  "story": "At the center or edge of a Vietnamese village stands the great banyan (cây đa), whose aerial roots and wide canopy make it a tree that is also a place. Beneath it the elders meet, disputes are settled, and the village's guardian spirit (the thành hoàng) is honored. The banyan is the village's living meeting hall and its spiritual axis — to sit in its shade is to sit in the company of the village's own spirit and of its ancestors.",
+  "history": "The banyan's centrality in Vietnamese village life is ancient and continuous. It is the physical focus of the thành hoàng worship (village guardian cult) and of communal decision-making. The image of the great banyan is so fundamental to Vietnamese village identity that it appears in folk song, in the iconography of the village, and in the very layout of the settlement. The tree's capacity to make new trunks from its aerial roots made it a natural symbol of the village's self-renewing continuity.",
+  "details": "The banyan is a tree that contains a community: its shade is the village's public space, its spirit is the village's guardian, and its endless rooting is the village's continuity. It is one of the most concrete expressions of the East Asian 'village sacred tree' pattern — the tree that makes a cluster of houses into a place with a soul.",
+  "symbolism": [
+   "village spirit",
+   "communal space",
+   "continuity",
+   "the guardian's dwelling"
+  ],
+  "sources": [
+   "Vietnamese village (làng) tradition and thành hoàng worship",
+   "Ethnographic studies of Vietnamese village sacred trees (cây đa)"
+  ],
+  "emblem": {
+   "form": "multi",
+   "accent": "#4f7d52",
+   "roots": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/24/Ficus_microcarpa_-_La_Gomera_01.jpg/330px-Ficus_microcarpa_-_La_Gomera_01.jpg",
+   "label": "Ficus microcarpa",
+   "title": "Ficus microcarpa"
+  }
+ },
+ {
+  "id": "philippines-bamboo",
+  "name": "Bamboo Stalk of Malakas at Maguayan",
+  "native": "kawayan · the bamboo",
+  "culture": "Philippine (Tagalog and broader)",
+  "region": "southeast-asia",
+  "era": "Oral tradition; recorded in the 17th c. and later",
+  "type": "Creation / origin tree",
+  "tree": "Bamboo (kawayan)",
+  "story": "In the Tagalog origin myth, the first man and woman, Malakas and Maguayan, were not born of clay or of a woman's body but of a bamboo stalk. A young man shoots an arrow at a bamboo; the stalk splits, and from it emerge a man and a woman — the first people. They argue about who will rule the world, and from their contest the world is shaped. The bamboo, a tree-like grass, is thus the womb of humanity itself.",
+  "history": "The bamboo origin myth is one of the most widespread creation narratives in the Philippines, with variants across Tagalog, Cebuano, and other Philippine languages. It was recorded by Spanish-era chroniclers and has been passed down orally ever since. The myth is a 'plant-womb' creation story — a type found across Island Southeast Asia — in which humanity emerges from a plant rather than from earth or from a divine parent.",
+  "details": "The choice of bamboo is culturally precise: bamboo is the most useful and most sacred of Philippine plants, the material of houses, boats, and instruments, and a symbol of flexibility and resilience. Making humanity out of bamboo is to make them of the most vital and useful material in the world. The myth encodes a botany of origin — people are plant-born, and the plant world is their elder sibling.",
+  "symbolism": [
+   "human origin",
+   "the plant womb",
+   "resilience",
+   "the usefulness of bamboo"
+  ],
+  "sources": [
+   "Tagalog and Philippine creation mythology (oral tradition)",
+   "Spanish-era chronicles of Philippine myths; modern collections of Philippine folklore"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#8a9a3e",
+   "bands": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Bamboo_forest.jpg/500px-Bamboo_forest.jpg",
+   "label": "Bamboo",
+   "title": "Bamboo"
+  }
+ },
+ {
+  "id": "thai-phi-tree",
+  "name": "Sacred Phi Tree of the Thai Village",
+  "native": "ต้นไม้ศักดิ์สิทธิ์ · nong mai sakchit (sacred tree)",
+  "culture": "Thai",
+  "region": "southeast-asia",
+  "era": "Ancient; continuous to present",
+  "type": "Spirit-dwelling village tree",
+  "tree": "Varies — often banyan, mango, or a great native tree",
+  "story": "Thai villages and households keep sacred trees in which phi (spirits) dwell — the guardian spirit of the village, the spirit of a place, or the spirit of an ancestor. Offerings of flowers, incense, food, and cloth are made at the tree, and the phi's favor is sought before planting, building, or traveling. The tree is the spirit's body: harm the tree and you harm the spirit; honor the tree and you are protected.",
+  "history": "The worship of phi in trees is a deep layer of Thai religion, underlying and coexisting with Theravada Buddhism. The sacred tree (nong mai sakchit) is a standard feature of Thai village life and of the household altar. The practice is part of the broader Southeast Asian pattern of spirit-dwelling trees seen across mainland and island Southeast Asia, and it persists in modern Thailand alongside Buddhist practice.",
+  "details": "The phi tree is a practical as well as a spiritual institution: it is where the community negotiates with the spirit world for protection and prosperity. The tree's specific species is less important than its age, size, and the spirit believed to inhabit it. It is the Thai expression of the widespread belief that a great old tree is a dwelling, not merely a plant.",
+  "symbolism": [
+   "spirit dwelling",
+   "protection",
+   "village guardian",
+   "negotiation with the spirit world"
+  ],
+  "sources": [
+   "Thai phi (spirit) worship tradition",
+   "Ethnographic studies of Thai village sacred trees (nong mai sakchit)"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#c2843c",
+   "bands": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Great_banyan_tree_kol.jpg/500px-Great_banyan_tree_kol.jpg",
+   "label": "Ficus benghalensis",
+   "title": "Ficus benghalensis"
+  }
+ },
+ {
+  "id": "angkor-banyan",
+  "name": "Living Banyans of Angkor",
+  "native": "ប្រាសាទអង្គរ · the temples of Angkor",
+  "culture": "Khmer",
+  "region": "southeast-asia",
+  "era": "Temple period (9th–15th c.); trees growing since then",
+  "type": "Temple-enshrouding sacred tree",
+  "tree": "Banyan (Ficus) and strangler fig",
+  "story": "At Angkor, great banyans and strangler figs have grown through and around the temple ruins for centuries, their roots wrapping the stone like hands around a body. At Ta Prohm and elsewhere, the trees and the temple have become a single structure: the banyan is both the destroyer and the consecrator of the sacred place. The Khmer built their temples as dwellings for the gods, and the banyans — themselves trees of spirit-dwelling — have simply continued that vocation, taking the stone for their own.",
+  "history": "The banyan was already sacred in Khmer and wider Southeast Asian tradition as a spirit-dwelling and a village tree. When the Angkor temples were abandoned (from the 15th c.), the banyans that had grown in and around them — likely already venerated — completed the fusion of tree and temple. Today the image of the banyan-strangled temple is the defining visual of Angkor and of Khmer spiritual landscape, a physical record of the tree's ancient sacred status reclaiming human stone.",
+  "details": "The Angkor banyans are a literal enactment of the sacred tree's power: the tree does not merely symbolize the divine dwelling, it becomes one, absorbing the human attempt to build a dwelling for the gods. The roots that crack the stone are the same roots that, in village belief, anchor a spirit to the earth. The temple is a tree's house as much as a god's.",
+  "symbolism": [
+   "tree and temple as one",
+   "spirit dwelling",
+   "reclamation",
+   "the sacred outlasting the built"
+  ],
+  "sources": [
+   "Angkor / Ta Prohm temple complex (UNESCO World Heritage)",
+   "Khmer banyan (spirit-dwelling tree) tradition"
+  ],
+  "emblem": {
+   "form": "multi",
+   "accent": "#7b4b2a",
+   "roots": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Great_banyan_tree_kol.jpg/500px-Great_banyan_tree_kol.jpg",
+   "label": "Ficus benghalensis",
+   "title": "Ficus benghalensis"
+  }
+ },
+ {
+  "id": "kaum-kaet",
+  "name": "Great Tree of the Sky God Kaum Kaet",
+  "native": "កូមកែត · Kaum Kaet",
+  "culture": "Khmer",
+  "region": "southeast-asia",
+  "era": "Khmer cosmology (pre- and post-Angkor)",
+  "type": "Sky-god's tree of power",
+  "tree": "Unnamed great tree of the sky",
+  "story": "In Khmer cosmology, the sky god Kaum Kaet (a form of the Hindu Indra) dwells in the heavens and is associated with a great tree whose fruit grants power and sovereignty. The god is depicted seated on the elephant Airavata, and his tree is the source of the authority that kings claim by divine right. To possess the fruit of the sky god's tree is to possess the right to rule — the tree is the botanical root of kingship itself.",
+  "history": "Kaum Kaet is one of the principal deities of Khmer folk cosmology, a native form of the Hindu Indra who survived the transition from Hindu-Buddhist state religion to Theravada Buddhism. His association with a great tree of power is part of the Khmer divine-kingship (devaraja) ideology, in which the king's authority was derived from the gods. The tree is thus less a mythic plant than a symbol of the divine source of political power in the Khmer world.",
+  "details": "The sky god's tree encodes a theology of sovereignty: power is not seized but eaten, taken from the fruit of a tree that belongs to the sky god. It is the Khmer expression of a widespread idea that legitimate rule is a divine gift, and that the tree — the axis of the world — is the channel through which that gift descends. It sits at the intersection of cosmology, kingship, and botany.",
+  "symbolism": [
+   "divine kingship",
+   "power from heaven",
+   "cosmic axis",
+   "the devaraja ideology"
+  ],
+  "sources": [
+   "Khmer devaraja (divine kingship) tradition",
+   "Khmer folk cosmology and Kaum Kaet (Indra) worship"
+  ],
+  "emblem": {
+   "form": "conical",
+   "accent": "#b08d3e",
+   "star": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Eucalyptus_tereticornis_flowers%2C_capsules%2C_buds_and_foliage.jpeg/330px-Eucalyptus_tereticornis_flowers%2C_capsules%2C_buds_and_foliage.jpeg",
+   "label": "Eucalyptus",
+   "title": "Eucalyptus"
+  }
+ },
+ {
+  "id": "dayak-world-tree",
+  "name": "World Tree and Naga of the Dayak",
+  "native": "pohon dunia · the world tree (Dayak)",
+  "culture": "Dayak (Borneo)",
+  "region": "southeast-asia",
+  "era": "Oral tradition; recorded from the 19th c.",
+  "type": "Cosmic axis-mundi tree",
+  "tree": "Great central tree (varies by group)",
+  "story": "In the cosmology of the Dayak peoples of Borneo, a great world tree stands at the center of creation, connecting the upper world of the gods, the middle world of humans, and the lower world of the dead. Coiled around the trunk is a great naga (serpent), whose body is the ring that binds the three realms together. The first human was shaped and placed at the foot of the tree, and the tree and the naga together are the frame within which all life — human, animal, and spirit — is ordered.",
+  "history": "The Dayak world-tree-and-naga cosmology is one of the great creation narratives of Island Southeast Asia, shared in variant forms across the Dayak groups (Kenyah, Kenoyan, Bidayuh, Iban, and others) of Borneo. It was recorded by colonial-era ethnographers and survives in the ritual language of the traditional Dayak priests (lemang / bangsor). The cosmology is part of the wider Austronesian and Bornean pattern of the world tree, and it sits alongside the naga/serpent motif that runs across Southeast Asian cosmology.",
+  "details": "The distinctive feature of the Dayak cosmology is the naga coiled around the tree: the tree is the vertical axis, the serpent is the horizontal binding that holds the three worlds in place. Together they form a cosmic loom — the structure within which life is woven. It is one of the most complete 'axis + binding' cosmologies in the world, a precise structural myth rather than a narrative one.",
+  "symbolism": [
+   "axis mundi",
+   "the naga binding",
+   "three realms",
+   "cosmic structure"
+  ],
+  "sources": [
+   "Dayak (Bornean) creation cosmology (oral tradition)",
+   "Ethnographic studies of Dayak (Kenyah/Kenoyan/Bidayuh) world-tree and naga cosmology"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#5b7d3e",
+   "cascade": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Dipterocarpus_bourdillonii_01.JPG/330px-Dipterocarpus_bourdillonii_01.JPG",
+   "label": "Dipterocarpus",
+   "title": "Dipterocarpus"
+  }
+ },
+ {
+  "id": "javanese-kerasukan",
+  "name": "Sacred Spirit Trees of Java",
+  "native": "pohon kerasukan · the possession trees",
+  "culture": "Javanese (Java, Indonesia)",
+  "region": "southeast-asia",
+  "era": "Ancient; continuous to present",
+  "type": "Spirit-possession tree",
+  "tree": "Varies — often banyan, almond, or a great native tree",
+  "story": "Across Java, certain great trees are the fixed dwellings of spirits (jihad / lelembut) who can possess a person (kerasukan) to deliver blessings, healing, or messages. Pilgrims travel to a specific sacred tree to be possessed by its spirit — to receive a cure, a prophecy, or a gift of strength. The tree is the spirit's anchor: the spirit is bound to that tree, and the pilgrim's journey is to the tree, not to a temple. The most famous of these is the tradition of the sacred trees of the Javanese spiritual landscape.",
+  "history": "The kerasukan (possession) tradition and its sacred trees are a deep layer of Javanese spiritual life, underlying the official Islam and the older Hindu-Buddhist heritage. The practice is part of the broader Javanese (and wider Indonesian) pattern of spirit-dwelling trees, and it persists in modern Java as a living form of popular piety. The sacred trees are often old, large, and located at crossroads, riverbanks, or forest edges — the liminal places where the spirit world is thought to be thin.",
+  "details": "The Javanese sacred tree is a site of direct spiritual contact: the tree is not merely honored but used as the point of entry for a spirit into a human body. This makes it a 'functional' sacred tree — a tree with a specific spiritual service (healing, prophecy, possession) rather than a purely symbolic one. It is one of the most active forms of tree-spirit worship in the world.",
+  "symbolism": [
+   "spirit possession",
+   "healing",
+   "the spirit's anchor",
+   "direct contact with the divine"
+  ],
+  "sources": [
+   "Javanese kerasukan (possession) tradition",
+   "Ethnographic studies of Javanese sacred trees and spirit worship"
+  ],
+  "emblem": {
+   "form": "branching",
+   "accent": "#7a4f8f",
+   "wind": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Sycomoros_old.jpg/330px-Sycomoros_old.jpg",
+   "label": "Ficus",
+   "title": "Ficus"
+  }
+ },
+ {
+  "id": "balinese-grove",
+  "name": "Sacred Grove of the Balinese Village",
+  "native": "wana · the forest;  banjar grove",
+  "culture": "Balinese (Bali, Indonesia)",
+  "region": "southeast-asia",
+  "era": "Ancient; continuous to present",
+  "type": "Village sacred grove",
+  "tree": "Mixed native forest (banyan, areca, and other sacred species)",
+  "story": "Each Balinese village (banjar) keeps a sacred grove (wana) at its edge, a stand of trees that is the dwelling of the village's guardian spirits and of the gods. The grove is the village's spiritual boundary and its source of water and protection. No one cuts a tree in the grove; offerings are made at its threshold; and the grove is the living link between the village and the mountain (the direction of the sacred). To protect the grove is to protect the village.",
+  "history": "The Balinese sacred grove is a central institution of Balinese Hindu village life, rooted in the Tri Hita Karana philosophy (harmony among humans, between humans and the divine, and between humans and nature). The grove is the physical expression of that third harmony — the living, protected relationship between the village and the natural world. It is part of the wider Balinese system of sacred landscapes (the concept of the 'sacred center' and the 'sacred boundary') and persists as a living practice in every Balinese village.",
+  "details": "The Balinese grove is a community-managed sacred forest — a real, functioning institution of environmental and spiritual protection. It is the Balinese answer to the question of how a community keeps a piece of the wild alive and sacred: by making it the dwelling of the gods and the boundary of the village. It is one of the most successful examples in the world of a sacred tree/grove tradition that also functions as conservation.",
+  "symbolism": [
+   "village boundary",
+   "harmony with nature",
+   "the gods' dwelling",
+   "sacred water"
+  ],
+  "sources": [
+   "Balinese Hindu village (banjar) tradition and Tri Hita Karana philosophy",
+   "Ethnographic studies of Balinese sacred groves (wana)"
+  ],
+  "emblem": {
+   "form": "multi",
+   "accent": "#5b8f6f",
+   "fronds": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0d/Big_Banyan_Tree_at_Bangalore.jpg/330px-Big_Banyan_Tree_at_Bangalore.jpg",
+   "label": "Banyan",
+   "title": "Banyan"
+  }
+ },
+ {
+  "id": "myanmar-nat",
+  "name": "Sacred Trees of the Myanmar Nats",
+  "native": "နတ် · nat (spirit); သစ် · tree",
+  "culture": "Burmese (Myanmar)",
+  "region": "southeast-asia",
+  "era": "Pre-Buddhist; continuous alongside Theravada Buddhism",
+  "type": "Nat (spirit) dwelling tree",
+  "tree": "Varies — each nat is associated with a specific tree or grove",
+  "story": "In Myanmar, the 37 nats (powerful spirits) — and countless local nats — are each associated with a sacred tree or grove where they dwell and where offerings are made. A nat's tree is its body and its throne: to honor the nat, one honors the tree. The nats are the spirits of ancestors, of heroes, and of the natural world, and their trees are the fixed points of their power. Pilgrims travel to a nat's tree to make merit, to seek protection, and to negotiate with the spirit for prosperity and safety.",
+  "history": "Nat worship is the indigenous spiritual layer of Burmese religion, coexisting with (and predating) Theravada Buddhism. The 37 nats were formally recognized and ordered in the 19th century (under King Bagyidaw), but the worship of nat-spirits in trees is far older. The tradition is a core part of Burmese popular religion, and the sacred trees of the nats are a visible and active part of the Burmese landscape and ritual life. It is part of the wider Southeast Asian pattern of spirit-dwelling trees.",
+  "details": "The Myanmar nat tree is a personalized sacred tree: each nat has its own tree, its own character, and its own domain (some are spirits of the dead, some of nature, some of historical figures). This makes the nat tree a richly individualized form of the sacred-tree tradition — a tree with a name, a biography, and a personality, rather than a generic spirit-dwelling. It is one of the most elaborate systems of tree-spirit worship in the world.",
+  "symbolism": [
+   "named spirit dwelling",
+   "merit and protection",
+   "ancestral power",
+   "personalized sacred tree"
+  ],
+  "sources": [
+   "Myanmar nat (spirit) worship tradition and the 37 nats",
+   "Ethnographic studies of Burmese nat trees and spirit worship"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#c2543c",
+   "jewels": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Dipterocarpus_bourdillonii_01.JPG/330px-Dipterocarpus_bourdillonii_01.JPG",
+   "label": "Dipterocarpus",
+   "title": "Dipterocarpus"
+  }
+ },
+ {
+  "id": "aztec-ometl",
+  "name": "Ometeōchtli, the Tree of the Sky",
+  "native": "ōmeteōchtli · the sky tree",
+  "culture": "Mexica (Aztec)",
+  "region": "americas",
+  "era": "Classic period (14th–16th c. CE)",
+  "type": "Cosmic axis-mundi tree",
+  "tree": "Ceiba (Ceiba pentandra)",
+  "story": "At the center of the Mexica world stands the great ceiba, the Ometeōchtli, the tree of the sky. Its roots reach down into the nine levels of the underworld (Mictlan), its trunk passes through the human world, and its crown holds up the heavens. Coiled around the trunk is the feathered serpent Quetzalcōatl, whose body is the tree's binding, and at the crown dwell the gods. The four directions of the world branch out from the tree's four main limbs. To stand at the base is to stand at the exact navel of creation.",
+  "history": "The ceiba as world tree is the inherited Mesoamerican axis mundi, present in Maya, Olmec, and later Mexica cosmology. In the Mexica picture it is the Ometeōchtli, the central tree of the cosmic mountain, and it appears in the iconography of the Templo Mayor and in the codices as the axis from which the four cardinal directions radiate. The ceiba's association with Quetzalcōatl makes it the tree at the center of the Mexica creation narrative — the tree around which the fifth sun was set.",
+  "details": "The ceiba's biology mirrors its myth: its thick, buttressed trunk, its aerial roots, and its enormous height made it the natural image of a world pillar. The association with Quetzalcōatl (the feathered serpent) ties the tree to wind, to the morning star, and to the giver of life. It is the Mesoamerican counterpart to Yggdrasil and the Dayak world tree — the axis that holds the cosmos in one column.",
+  "symbolism": [
+   "axis mundi",
+   "the four directions",
+   "Quetzalcōatl's body",
+   "the navel of creation"
+  ],
+  "sources": [
+   "Mexica (Aztec) cosmology; the codices (Borgia, Nuttall, Vaticanus A)",
+   "Restall, Matthew. The Maya (context of Mesoamerican world-tree)",
+   "Millon, Renato. The Aztecs (cosmography of the Templo Mayor)"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#c2543c",
+   "cascade": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Panguana-Lupuna-2008-2.jpg/500px-Panguana-Lupuna-2008-2.jpg",
+   "label": "Ceiba pentandra",
+   "title": "Ceiba pentandra"
+  }
+ },
+ {
+  "id": "maya-witz",
+  "name": "Witz, the World Tree of the Maya",
+  "native": "witz · the sacred mountain-tree",
+  "culture": "Maya",
+  "region": "americas",
+  "era": "Preclassic–Classic (2000 BCE–900 CE) and continuous",
+  "type": "Cosmic axis-mundi tree",
+  "tree": "Ceiba (Ceiba pentandra)",
+  "story": "In Maya cosmology the world tree (often the ceiba) is the axis that connects the three worlds: the upper world of the gods, the human world, and Xibalba, the underworld. The tree grows out of the sacred mountains (witz, which means both 'tree' and 'mountain'), and its roots reach into the caves of the underworld where the ancestors dwell. The jaguar, the deer, and the howler monkey — the lords of the night — travel along the tree's trunk between the worlds. At the crown, the tree bears the fruits of life and the seat of the gods.",
+  "history": "The witz concept — the fusion of tree and mountain as the axis of the world — is one of the oldest and most continuous ideas in Mesoamerican cosmology, running from the Olmec through the Classic Maya to the modern Maya. The ceiba's role as world tree is visible in the iconography of the Classic temples (the temple itself is a stylized witz) and in the Popol Vuh, where the first tree the gods plant is the world tree. It remains a living concept in modern Maya (K'iche', Q'eqchi') cosmology and ritual.",
+  "details": "The witz is a double image: the tree is a mountain and the mountain is a tree. This fusion is the key to Maya sacred landscape — a great ceiba is a mountain you can climb to the gods, and a sacred cave is a root you can descend into the underworld. The tree is thus not a symbol but the actual structure of the world, the ladder between life and death and between earth and sky.",
+  "symbolism": [
+   "axis mundi",
+   "tree–mountain fusion",
+   "the three worlds",
+   "the ladder of the soul"
+  ],
+  "sources": [
+   "Popol Vuh (the K'iche' creation narrative)",
+   "The codices (Dresden, Madrid) — witz and ceiba iconography",
+   "Culican, Luis. The World Tree of the Maya (witz cosmology)"
+  ],
+  "emblem": {
+   "form": "conical",
+   "accent": "#4f7d52",
+   "cascade": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Panguana-Lupuna-2008-2.jpg/500px-Panguana-Lupuna-2008-2.jpg",
+   "label": "Ceiba pentandra",
+   "title": "Ceiba pentandra"
+  }
+ },
+ {
+  "id": "kiche-world-tree",
+  "name": "World Tree of the Popol Vuh",
+  "native": "Yuh' Tepeu · the tree of the gods",
+  "culture": "K'iche' (Maya)",
+  "region": "americas",
+  "era": "Pre-Columbian; codified in the 16th c. Popol Vuh",
+  "type": "Creation / axis-mundi tree",
+  "tree": "Unnamed great tree (the ceiba in later identification)",
+  "story": "In the Popol Vuh, after the gods create the world, they plant a great tree at its center — the world tree — before they create humanity. The tree is the first and most important thing the gods set in the world, the axis that holds the cosmos together. Only after the tree is planted do the gods turn to making the humans who will live beneath it and worship it. The tree is thus prior to, and more fundamental than, humankind.",
+  "history": "The Popol Vuh is the K'iche' Maya creation narrative, composed in the K'iche' language and written down in the 16th century (the oldest surviving copy dates to c. 1554–1701). The world tree it describes is the K'iche' expression of the wider Mesoamerican witz cosmology. The narrative's sequence — world, then tree, then humans — encodes a theology in which the cosmic axis is the primary act of creation, and humanity is the secondary, dependent order that lives in the tree's shade.",
+  "details": "The Popol Vuh's ordering — tree before people — is the distinctive theological claim: the axis mundi is the gods' first and greatest work, and humans are the tenants of a world the tree already holds up. It is a precise statement of the sacred tree's primacy, making the tree not a symbol of creation but the first act of it. It is the clearest textual expression of the Mesoamerican world tree in a creation narrative.",
+  "symbolism": [
+   "primacy of the axis",
+   "creation order",
+   "the gods' first work",
+   "humanity as tenant"
+  ],
+  "sources": [
+   "Popol Vuh (the K'iche' creation narrative, trans. Dennis Tedlock / Recinos & Adams)",
+   "Studies of K'iche' Maya cosmology and the world tree"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#7a4f8f",
+   "star": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Panguana-Lupuna-2008-2.jpg/500px-Panguana-Lupuna-2008-2.jpg",
+   "label": "Ceiba pentandra",
+   "title": "Ceiba pentandra"
+  }
+ },
+ {
+  "id": "aztec-amate",
+  "name": "Amate, the Bark-Paper Fig",
+  "native": "amate · the amate tree",
+  "culture": "Mexica (Aztec) and wider Mesoamerican",
+  "region": "americas",
+  "era": "Pre-Columbian; continuous craft to present",
+  "type": "Sacred craft tree",
+  "tree": "Fig (Ficus, esp. Ficus cotinifolia / Ficus aurea)",
+  "story": "The amate tree (a fig) gives its inner bark, which is beaten into the finest paper in the pre-Columbian world. On this paper the scribes painted the sacred books — the codices — that carried the myths, the rituals, the histories, and the calendars of the Mexica and the Maya. The amate tree is thus the tree that carried the sacred word: without its bark, the sacred knowledge had no body. The tree is the physical ancestor of every Mesoamerican sacred book.",
+  "history": "Amate paper (from Nahuatl amatl, 'paper') was the primary writing surface in pre-Columbian Mesoamerica, made from the beaten inner bark of the fig. The great codices (the Borgia, the Nuttall, the Dresden) are on amate. When the Spanish burned the codices in the 16th century, they destroyed the paper of the amate tree — the physical body of a civilization's sacred knowledge. The amate craft survives today in Oaxaca and elsewhere, where the fig is still beaten into paper for ritual and artistic use, a continuous thread from the pre-Columbian scribes to the present.",
+  "details": "The amate fig is a 'functional' sacred tree — its sanctity comes from what it gives: the material of the sacred book. It is the tree of the written word in Mesoamerica, and its bark is the medium through which the myths and rituals were made tangible. It is one of the few sacred trees whose holiness is defined by a craft rather than a cosmology — the tree that made knowledge physical.",
+  "symbolism": [
+   "the sacred word",
+   "the body of the codex",
+   "craft as sanctity",
+   "knowledge made physical"
+  ],
+  "sources": [
+   "The Mesoamerican codices (Borgia, Nuttall, Dresden) — amate paper",
+   "Millon, Renato. The Aztecs (amate paper and the codices)",
+   "The Oaxacan amate paper craft (continuity)"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#b08d3e",
+   "bands": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Ficus_cotinifolia_33045599.jpg/500px-Ficus_cotinifolia_33045599.jpg",
+   "label": "Ficus cotinifolia",
+   "title": "Ficus cotinifolia"
+  }
+ },
+ {
+  "id": "tree-of-peace",
+  "name": "Great Tree of Peace of the Haudenosaunee",
+  "native": "the Great Tree of Peace (the white pine)",
+  "culture": "Haudenosaunee (Iroquois)",
+  "region": "americas",
+  "era": "c. 12th c. CE (the Peacemaker's founding); continuous",
+  "type": "Founding / covenant tree",
+  "tree": "White pine (Pinus strobus)",
+  "story": "When the Peacemaker (Deganawida) and Hiawatha founded the Haudenosaunee Confederacy, they planted a great white pine — the Tree of Peace — at the center of the longhouse. Its roots spread out in all four directions, reaching every nation, binding them together in peace. Its branches reach up to the sky, carrying the message of peace to the spirits above. Beneath it the council sits, and its shade is the peace itself. To cut the Tree of Peace is to break the covenant of the Confederacy.",
+  "history": "The Tree of Peace is the founding symbol of the Haudenosaunee (Iroquois) Confederacy, established by the Peacemaker and Hiawatha (traditionally placed around the 12th century, though the confederacy's final form is later). The Great Law of Peace (the Gayanashagowa) is the constitution of the Confederacy, and the Tree of Peace is its central image. The white pine was chosen for its longevity, its straight trunk, and its open, spreading crown — the physical embodiment of lasting, all-reaching peace. The image survives in the Haudenosaunee flag and in the confederacy's continuing governance.",
+  "details": "The Tree of Peace is a political as well as a spiritual tree: it is the living symbol of a constitution, the root-system that binds six (originally five) nations into one. Its roots reaching to every nation encode the idea that peace is not an abstraction but a root-network — a living structure that holds the political order together. It is one of the few sacred trees that is also a founding document in the secular sense.",
+  "symbolism": [
+   "the covenant of peace",
+   "political unity",
+   "longevity",
+   "the root-network of nations"
+  ],
+  "sources": [
+   "The Great Law of Peace (Gayanashagowa) of the Haudenosaunee",
+   "Alder, Donald. The Haudenosaunee and the Tree of Peace",
+   "The Haudenosaunee (Iroquois) confederacy tradition"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#4f7d52",
+   "roots": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/48/Pinus_strobus_trees.jpg/330px-Pinus_strobus_trees.jpg",
+   "label": "Pinus strobus",
+   "title": "Pinus strobus"
+  }
+ },
+ {
+  "id": "lakota-sacred-tree",
+  "name": "The Sacred Tree of the Black Elk Vision",
+  "native": "the hanging / sacred tree (Lakota vision)",
+  "culture": "Lakota (Siouan)",
+  "region": "americas",
+  "era": "19th century (Black Elk's vision, c. 1876–1890); continuous in Lakota memory",
+  "type": "Vision / cosmic tree",
+  "tree": "A great tree (the 'hanging tree' of the vision; often read as a world tree)",
+  "story": "In the great vision of Black Elk (Oglala Lakota), as a boy struck unconscious on the plains, he is lifted up into a great tree — a tree of light, hung in the air, its branches reaching out and its leaves bright with the faces of the spirits. From the top of the tree he sees the whole world spread out below, and the voices of the elders of the spirit world call to him: he is to be a holy man, a bringer of the vision. The tree is the axis of the vision — the ladder by which a human is lifted into the cosmic order and given a mission.",
+  "history": "Black Elk's vision is one of the most widely known Native American spiritual narratives, recorded by John Neihardt in Black Elk Speaks (1933). The sacred tree at its center is the Lakota expression of the wider Plains and Siouan world-tree motif, and the vision is the foundational text of Black Elk's life and of the later Oglala spiritual movement. The tree in the vision — a tree hung in the air, bearing the faces of the spirits — is a precise image of the axis mundi as a living, conscious ladder between the human and the divine.",
+  "details": "The tree of Black Elk's vision is distinctive in being a tree in the air — detached, hung, radiant — rather than a tree rooted in the earth. This makes it a tree of ascent and revelation: the axis by which a human is lifted into the cosmic perspective. It is the Lakota image of the world tree as a ladder of vision, and it sits at the center of one of the most important spiritual autobiographies in Native American literature.",
+  "symbolism": [
+   "the ladder of vision",
+   "ascent to the cosmic",
+   "the mission",
+   "the tree of light"
+  ],
+  "sources": [
+   "Neihardt, John. Black Elk Speaks (1933)",
+   "The Oglala Lakota vision tradition"
+  ],
+  "emblem": {
+   "form": "branching",
+   "accent": "#d4a017",
+   "star": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Quercus_robur.jpg/330px-Quercus_robur.jpg",
+   "label": "Oak",
+   "title": "Quercus"
+  }
+ },
+ {
+  "id": "nw-coast-cedar",
+  "name": "Red Cedar of the Northwest Coast",
+  "native": "the red cedar (Haida / Tlingit / Coast Salish)",
+  "culture": "Haida, Tlingit, and Coast Salish (Northwest Coast)",
+  "region": "americas",
+  "era": "Ancient; continuous to present",
+  "type": "Cultural / spiritual tree",
+  "tree": "Western red cedar (Thuja plicata)",
+  "story": "On the Northwest Coast, the red cedar is the tree of the culture itself. It gives the bark for the clothing, the blankets, and the weaving; the wood for the canoes, the houses, and the totem poles; and the boughs for the sweat lodge and the ceremonies. The Haida, Tlingit, and Coast Salish peoples consider the red cedar a relative and a giver — a being that gives its body so that the people can live, build, and worship. To take cedar is to enter a relationship of reciprocity, and to waste it is a grave offense.",
+  "history": "The red cedar (Thuja plicata) is the most important cultural material of the Northwest Coast peoples, and its use spans thousands of years. The great totem poles of the Haida and Tlingit are carved from cedar; the ocean-going canoes are cedar; the regalia and the weaving are cedar bark. The tree's centrality is so total that it is often called the 'tree of life' of the Northwest Coast — the single species from which the material culture is built. The practice of sustainable cedar harvesting (taking only what is needed, with ceremony and thanks) is a continuous tradition.",
+  "details": "The red cedar is a 'total' sacred tree — it is sacred because it gives everything: clothing, transport, shelter, art, and ritual material. Its sanctity is relational and reciprocal: the people take from the tree and give back thanks and restraint. It is one of the clearest examples in the world of a sacred tree whose holiness is defined by its generosity and by the ethic of reciprocity that its use demands.",
+  "symbolism": [
+   "the giver of all",
+   "reciprocity",
+   "cultural foundation",
+   "the relative"
+  ],
+  "sources": [
+   "Haida, Tlingit, and Coast Salish cedar tradition",
+   "The totem-pole and canoe traditions of the Northwest Coast",
+   "Ethnographic studies of Northwest Coast red-cedar use"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#5b7d3e",
+   "bands": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/Thuja_plicata_Vancouver.jpg/330px-Thuja_plicata_Vancouver.jpg",
+   "label": "Thuja plicata",
+   "title": "Thuja plicata"
+  }
+ },
+ {
+  "id": "inca-huaca",
+  "name": "Huaca, the Sacred Trees of the Inca",
+  "native": "huaca · the sacred thing",
+  "culture": "Inca (Tawantinsuyu)",
+  "region": "americas",
+  "era": "Inca period (15th–16th c. CE); pre-Inca roots",
+  "type": "Huaca (sacred object) tree",
+  "tree": "Varies — native Andean trees and groves",
+  "story": "In the Inca world, a huaca is anything sacred — a mountain, a river, a stone, a tree, an image. The sacred trees (huacas) are the fixed dwelling-places of the malleqs (spirits) and of the ancestors, and they are the points at which the community makes offerings (despachos) to secure the favor of the spirits and the fertility of the land. A huaca-tree is the local sacred center of a village or an ayllu, the point at which the human and the spirit worlds meet and exchange.",
+  "history": "The huaca system is the indigenous sacred-landscape tradition of the Andes, inherited by the Inca from the pre-Inca cultures (the Wari, the Tiwanaku, and earlier). The Inca incorporated thousands of huacas — including sacred trees and groves — into the imperial system of sacred places. The tradition survived the Spanish conquest in transformed form and persists in modern Andean (Quechua and Aymara) practice, where the huaca-trees and the offerings to them are a living part of rural Andean religion.",
+  "details": "The huaca-tree is a 'sacred object' in the Andean sense — a thing that is a person, that has a will and a presence, and with which one negotiates. Its sanctity is not symbolic but ontological: the tree is a being, and the offerings are a real exchange with a real agent. It is the Andean expression of the sacred tree as a living person rather than a symbol, and it is one of the most persistent pre-Columbian traditions in the Americas.",
+  "symbolism": [
+   "the sacred as person",
+   "exchange with the spirit",
+   "local sacred center",
+   "fertility and favor"
+  ],
+  "sources": [
+   "The Inca huaca tradition",
+   "The Andean (Quechua/Aymara) huaca and despacho tradition",
+   "Ethnographic studies of Andean sacred landscape and huacas"
+  ],
+  "emblem": {
+   "form": "roots",
+   "accent": "#7b4b2a",
+   "roots": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/eb/Polylepis_rugulosa_%28A._Yates%29.jpg/330px-Polylepis_rugulosa_%28A._Yates%29.jpg",
+   "label": "Polylepis",
+   "title": "Polylepis"
+  }
+ },
+ {
+  "id": "mapuche-pehuen",
+  "name": "Pehuen, the Sacred Araucaria of the Mapuche",
+  "native": "pehuen · the pehuén (Araucaria)",
+  "culture": "Mapuche (Araucanía, Chile/Argentina)",
+  "region": "americas",
+  "era": "Ancient; continuous to present",
+  "type": "Spirit-dwelling / sacred tree",
+  "tree": "Araucaria araucana (the pehuén / monkey-puzzle)",
+  "story": "For the Mapuche, the pehuen (the araucaria) is a sacred tree, the dwelling of the spirits and a symbol of endurance and of the connection between the earth and the sky. Its seeds (the piñones) are food, its wood is for building, and its great, slow-growing form is the image of the Mapuche's own resilience. The pehuen is the tree of the Mapuche identity — the tree that has stood through the conquest, the colonization, and the long struggle for the land, and that still stands as the symbol of the Mapuche's rootedness and their claim to the land.",
+  "history": "The pehuen (Araucaria araucana) is the signature tree of the Andean patagonian region and the central sacred tree of the Mapuche. The region's name, Araucanía, is derived from the tree. The pehuen is a symbol of Mapuche identity and resistance, and the Mapuche's relationship with it — as food, building material, and sacred tree — is a continuous tradition. The tree's great age and slow growth made it the natural image of endurance, and it is central to the Mapuche's claim to the land and to their spiritual life.",
+  "details": "The pehuen is a 'total' sacred tree for the Mapuche — sacred, useful, and symbolic at once. Its very form (the slow-growing, long-lived araucaria) is the image of the Mapuche's own endurance. It is the botanical root of the region's name and the central plant of Mapuche identity, making it one of the most politically and spiritually charged sacred trees in the Americas.",
+  "symbolism": [
+   "endurance",
+   "Mapuche identity",
+   "the claim to the land",
+   "the dwelling of the spirits"
+  ],
+  "sources": [
+   "The Mapuche pehuen (araucaria) tradition",
+   "The Araucanía region (name derived from the pehuen)",
+   "Ethnographic studies of Mapuche sacred trees and identity"
+  ],
+  "emblem": {
+   "form": "conical",
+   "accent": "#8a5a3b",
+   "bands": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bb/Araucaria_en_Parque_Nacional_Conguillio.jpg/330px-Araucaria_en_Parque_Nacional_Conguillio.jpg",
+   "label": "Araucaria araucana",
+   "title": "Araucaria araucana"
+  }
+ },
+ {
+  "id": "maori-whakapapa",
+  "name": "Whakapapa, the Genealogical Tree of the Māori",
+  "native": "whakapapa · the genealogy / layered foundation",
+  "culture": "Māori (Aotearoa / New Zealand)",
+  "region": "oceania",
+  "era": "Ancient; continuous to present",
+  "type": "Genealogical / cosmic tree",
+  "tree": "The whakapapa (a genealogical/cosmological structure, often imagined as a tree)",
+  "story": "For the Māori, whakapapa is the layered genealogy that connects every person, every thing, and every place to every other — a tree of descent that reaches from the individual back through the ancestors, the tribes, the natural world, and up to the gods and to the primal parent. The whakapapa is the tree of identity: it tells you who you are, where you come from, and what you are responsible to. To know your whakapapa is to know your place in the whole of creation. The tree is the structure of Māori identity and of the Māori relationship to the land and the cosmos.",
+  "history": "Whakapapa is a foundational concept of Māori culture and a central organizing principle of Māori society. It is the genealogical and cosmological tree that connects the human to the divine and to the natural world, and it is the basis of Māori identity, law, and relationship to the land (the concept of kaitiakitanga, guardianship). The tradition is continuous and living, and the whakapapa is recited in the karanga (the call) and in the powhiri (the welcome) as the means by which a person is connected to the ancestors and to the place. It is the Māori expression of the sacred tree as the structure of identity and of the cosmos.",
+  "details": "The whakapapa is distinctive in being a genealogical tree — a tree of descent rather than a tree of the world. It is the structure by which the Māori understand themselves as part of a continuous lineage that reaches back to the gods and forward to the descendants. It is the Māori answer to the question of identity and belonging, and it is one of the most sophisticated and living expressions of the sacred-tree concept in the world.",
+  "symbolism": [
+   "identity and descent",
+   "the connection to the gods",
+   "guardianship (kaitiakitanga)",
+   "the structure of belonging"
+  ],
+  "sources": [
+   "The Māori whakapapa tradition",
+   "The Māori karanga and powhiri (genealogical welcome) tradition",
+   "Studies of Māori cosmology and whakapapa"
+  ],
+  "emblem": {
+   "form": "branching",
+   "accent": "#3f6f8f",
+   "roots": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5b/PohutukawaCornwallis.jpg/330px-PohutukawaCornwallis.jpg",
+   "label": "Pōhutukawa",
+   "title": "Metrosideros excelsa"
+  }
+ },
+ {
+  "id": "hawaiian-koa",
+  "name": "Koa, the Sacred Wood of the Aliʻi",
+  "native": "koa · the koa tree",
+  "culture": "Hawaiian",
+  "region": "oceania",
+  "era": "Ancient; continuous to present",
+  "type": "Aliʻi (chiefly) sacred tree",
+  "tree": "Koa (Acacia koa)",
+  "story": "In Hawaii, the koa is the sacred wood of the aliʻi (the chiefs and the royalty). Its heartwood is the material of the most sacred objects — the staffs of office (the ʻōpa), the ceremonial objects, and the finest canoes. The koa is a tree of rank and of the divine: to work in koa is to work in the wood of the chiefs and the gods. The tree is the botanical embodiment of the Hawaiian concept of rank (the ʻāina and the aliʻi), and its wood carries the mana (the sacred power) of the office it serves.",
+  "history": "The koa (Acacia koa) is the signature hardwood of Hawaii and the traditional wood of the aliʻi. Its use for the staffs of office, the ceremonial objects, and the canoes is a continuous tradition from the ancient Hawaiian kingdom to the present. The tree's association with rank and the divine is a core part of the Hawaiian cultural and spiritual system, and the koa is protected today as a threatened species — a protection that reflects its continuing cultural and spiritual significance. It is the Hawaiian expression of the sacred tree as the material of the divine and the political.",
+  "details": "The koa is a 'rank' sacred tree — its sanctity is tied to the social and spiritual hierarchy (the aliʻi and the mana). It is the wood that carries the sacred power of the office, and its use is reserved for the most important and the most sacred objects. It is one of the clearest examples of a sacred tree whose holiness is defined by its association with rank and the divine, and by the restriction of its use to the highest purposes.",
+  "symbolism": [
+   "rank and the aliʻi",
+   "the mana (sacred power)",
+   "the wood of the divine",
+   "protection and continuity"
+  ],
+  "sources": [
+   "The Hawaiian koa (Acacia koa) tradition",
+   "The aliʻi (chiefly) and mana tradition of Hawaii",
+   "Ethnographic studies of Hawaiian sacred wood and the koa"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#8a5a3b",
+   "bands": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f9/Acacia_koa_study_7.jpg/330px-Acacia_koa_study_7.jpg",
+   "label": "Acacia koa",
+   "title": "Acacia koa"
+  }
+ },
+ {
+  "id": "hawaiian-lehua",
+  "name": "Lehua, the Sacred Flower-Tree of Pele",
+  "native": "ʻlehua · the lehua tree",
+  "culture": "Hawaiian",
+  "region": "oceania",
+  "era": "Ancient; continuous to present (state flower since 1892)",
+  "type": "Goddess-associated sacred tree",
+  "tree": "Lehua (Meliosma rugosa / the ʻlehua)",
+  "story": "In Hawaii, the ʻlehua tree (with its brilliant red and yellow flowers) is sacred to Pele, the goddess of fire and of the volcanoes. The lehua is the tree of the volcano, and its red flowers are the image of Pele's fire. To plant a lehua is to invite the presence of Pele, and the tree is associated with the sacred power (the mana) of the volcanic goddess. The lehua is also the state flower of Hawaii, a formal recognition of its sacred and cultural centrality. It is the tree that carries the fire of the goddess into the visible world.",
+  "history": "The ʻlehua (Meliosma rugosa) is one of the most sacred trees in Hawaiian culture, associated with Pele and with the volcanic tradition. Its designation as the state flower of Hawaii (in 1892) is a formal, modern recognition of its ancient sacred status. The tree's association with Pele and with fire is a core part of the Hawaiian spiritual landscape, and the lehua is a living part of Hawaiian ritual and of the relationship between the people and the volcanic goddess. It is the Hawaiian expression of the sacred tree as the visible body of a goddess.",
+  "details": "The lehua is a 'goddess-body' sacred tree — its flowers are the image of Pele's fire, and the tree is the visible manifestation of the volcanic goddess. Its red and yellow blossoms make it the botanical embodiment of fire, and its sacred status is tied directly to the person of Pele. It is one of the clearest examples of a sacred tree as the bodily image of a specific deity, and it is the most florally vivid of the Hawaiian sacred trees.",
+  "symbolism": [
+   "the body of Pele",
+   "fire made visible",
+   "the mana of the goddess",
+   "the state flower"
+  ],
+  "sources": [
+   "The Hawaiian ʻlehua (Meliosma rugosa) tradition",
+   "The Pele (volcanic goddess) tradition of Hawaii",
+   "The designation of the ʻlehua as the state flower of Hawaii (1892)"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#c2543c",
+   "fruit": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ed/Meliosma_veitchorum1.jpg/330px-Meliosma_veitchorum1.jpg",
+   "label": "Meliosma",
+   "title": "Meliosma"
+  }
+ },
+ {
+  "id": "aboriginal-dreaming",
+  "name": "The Dreaming Trees of the Aboriginal Australians",
+  "native": "the Dreaming / the Dreamtime trees",
+  "culture": "Aboriginal Australian (many nations)",
+  "region": "oceania",
+  "era": "Ancient (the Dreaming); continuous for 60,000+ years",
+  "type": "Dreaming / songline tree",
+  "tree": "Varies — the great trees of the Dreaming (e.g., the ironbark, the mulga, the coolamon trees)",
+  "story": "In Aboriginal Australian cosmology, the Dreaming (the Tjukurpa) is the eternal time of creation, when the ancestral beings sang the world into existence. The great trees of the Dreaming are the physical traces of that singing — the places where the ancestors made their camps, where they sang, and where they left their power. Each tree is a node in a songline, a point where the Dreaming is present in the land, and to sing the song of a tree is to keep the world alive. The trees are not objects in the landscape; they are the landscape's memory and its law.",
+  "history": "The Dreaming (the Tjukurpa) is the foundational cosmology of Aboriginal Australian culture, the oldest continuous spiritual tradition on earth, stretching back more than 60,000 years. The great trees of the Dreaming are central to the songlines — the sung paths that cross the continent and connect the sacred sites. The relationship between the Aboriginal peoples and the great trees (the ironbarks, the mulga, the coolamon trees) is a continuous, living tradition, and the trees are integral to the law, the ceremony, and the identity of the Aboriginal nations. It is one of the oldest and most continuous sacred-tree traditions in the world.",
+  "details": "The Dreaming trees are distinctive in being the physical traces of an eternal act of creation — the places where the ancestors sang the world into being. Their sanctity is not symbolic but ontological: the tree is the land's memory and its law, and to sing its song is to keep the world in existence. It is one of the most profound expressions of the sacred tree as the living structure of reality, and it is the oldest continuous tree-spirit tradition known.",
+  "symbolism": [
+   "the Dreaming / the Tjukurpa",
+   "the songline",
+   "the land's memory",
+   "the law of the world"
+  ],
+  "sources": [
+   "The Aboriginal Australian Dreaming (Tjukurpa) tradition",
+   "The songline tradition of Aboriginal Australia",
+   "Studies of Aboriginal Australian cosmology and the sacred trees of the Dreaming"
+  ],
+  "emblem": {
+   "form": "roots",
+   "accent": "#c2843c",
+   "roots": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4c/Eucalyptus_tereticornis_flowers%2C_capsules%2C_buds_and_foliage.jpeg/330px-Eucalyptus_tereticornis_flowers%2C_capsules%2C_buds_and_foliage.jpeg",
+   "label": "Eucalyptus",
+   "title": "Eucalyptus"
+  }
+ },
+ {
+  "id": "baobab",
+  "name": "The Baobab, the Tree of Life of Africa",
+  "native": "the baobab (Adansonia)",
+  "culture": "Pan-African (many peoples)",
+  "region": "africa",
+  "era": "Ancient; continuous to present",
+  "type": "Village / sacred / life tree",
+  "tree": "Baobab (Adansonia, esp. Adansonia digitata)",
+  "story": "Across Africa, the baobab is the tree of life. Its great trunk stores water for the dry season, its fruit is food, its leaves are medicine, and its shade is the meeting place of the village. In the myths of the Dogon, the Yoruba, and many other peoples, the baobab is a tree with a spiritual history — sometimes a tree that was turned upside-down by the gods (its roots in the sky, its branches in the earth), sometimes the dwelling of the ancestors, sometimes the axis of the village. The baobab is the tree that keeps a community alive through the drought, and its very survival is the image of life itself.",
+  "history": "The baobab (Adansonia) is one of the most widespread and most sacred trees in Africa, with a presence in the myth, the medicine, the food, and the daily life of countless African peoples. Its great age (some baobabs are thousands of years old) and its capacity to store water made it the natural symbol of endurance and of life in the dry savanna. The tree appears in the creation myths of many African peoples (the 'upside-down baobab' myth is widespread), and it is a central feature of the African sacred landscape. It is one of the most universally recognized sacred trees in the world.",
+  "details": "The baobab is a 'total' life tree — it gives water, food, medicine, shade, and spiritual presence. Its very biology (the water-storing trunk, the great age) makes it the image of survival and of life in the face of the drought. The 'upside-down baobab' myth (the tree that was inverted by the gods) is one of the most widespread African creation stories, and it encodes the idea that the baobab is a tree set apart by the divine. It is the single most iconic sacred tree of the African continent.",
+  "symbolism": [
+   "life in the drought",
+   "endurance",
+   "the village's meeting place",
+   "the inverted tree myth"
+  ],
+  "sources": [
+   "The African baobab (Adansonia) tradition",
+   "The 'upside-down baobab' creation myth (widespread in West and East Africa)",
+   "Ethnographic studies of the baobab in African myth and daily life"
+  ],
+  "emblem": {
+   "form": "round",
+   "accent": "#8a5a3b",
+   "wells": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Baobab_and_elephant%2C_Tanzania.jpg/500px-Baobab_and_elephant%2C_Tanzania.jpg",
+   "label": "Adansonia digitata",
+   "title": "Adansonia digitata"
+  }
+ },
+ {
+  "id": "yoruba-iroko",
+  "name": "Irókò, the Sacred Tree of Ọ̀ṣun and the Yoruba",
+  "native": "irókò · the iróko tree",
+  "culture": "Yoruba (Nigeria, Benin, and the diaspora)",
+  "region": "africa",
+  "era": "Ancient; continuous to present",
+  "type": "Orishas / sacred tree",
+  "tree": "Iróko (Milicia excelsa / the African teak)",
+  "story": "In Yoruba religion, the iróko is a sacred tree, associated with the orishas (the divine powers) and with the ancestors. It is the tree of strength and of the community, and its great size and its durability made it the natural image of the divine power (the àṣẹ) that holds the world together. The iróko is a tree of the orishas, and its presence in a village is a sign of the divine favor. To cut an iróko without ritual is a grave offense, and the tree is a fixed point of the Yoruba sacred landscape. In the Yoruba cosmology, the iróko is the tree that carries the weight of the world and the power of the gods.",
+  "history": "The iróko (Milicia excelsa) is one of the most sacred trees in Yoruba religion, associated with the orishas and with the concept of àṣẹ (the divine power that makes things happen). Its use as a sacred tree is continuous from the ancient Yoruba kingdom to the present, and it survives in the Yoruba diaspora (in Cuba, Brazil, and the Caribbean) as a central element of the Santería, Candomblé, and other Yoruba-derived religions. The iróko is the botanical embodiment of the Yoruba concept of divine power, and it is one of the most important sacred trees of the Yoruba spiritual system.",
+  "details": "The iróko is a 'power' sacred tree — its sanctity is tied to the concept of àṣẹ, the divine force that animates the world. Its great strength and durability made it the natural image of that power, and its presence is a sign of the divine favor. It is one of the clearest examples of a sacred tree as the bodily image of a divine force, and it is a central element of the Yoruba religion and its diaspora.",
+  "symbolism": [
+   "àṣẹ (divine power)",
+   "strength and endurance",
+   "the orishas' dwelling",
+   "the sign of divine favor"
+  ],
+  "sources": [
+   "The Yoruba iróko (Milicia excelsa) tradition",
+   "The Yoruba orisha and àṣẹ tradition",
+   "The Yoruba diaspora (Santería, Candomblé) sacred-tree tradition"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#4f7d52",
+   "bands": true
+  },
+  "photo": {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/Milicia_roadside_small.jpg/330px-Milicia_roadside_small.jpg",
+   "label": "Milicia excelsa",
+   "title": "Milicia excelsa"
+  }
+ },
+ {
+  "id": "yoruba-egbesu",
+  "name": "Ègbèsú, the Sacred Tree of Ifá",
+  "native": "ègbèsú · the ègbèsú tree",
+  "culture": "Yoruba (Nigeria, Benin, and the diaspora)",
+  "region": "africa",
+  "era": "Ancient; continuous to present",
+  "type": "Ifá / divination sacred tree",
+  "tree": "Ègbèsú (a specific sacred tree of the Ifá priests)",
+  "story": "In the Yoruba Ifá tradition, the ègbèsú is the sacred tree of the babalawo (the Ifá priest). It is the tree under which the priest sits to consult the oracle, the tree that anchors the priest's connection to the divine and to the ancestors. The ègbèsú is the physical center of the Ifá shrine, and its presence is a requirement for the priest's work. To sit under the ègbèsú is to sit at the point where the human and the divine meet, and the tree is the channel through which the wisdom of Ifá flows. It is the tree of the sacred word and of the divine consultation.",
+  "history": "The ègbèsú is a specific sacred tree of the Yoruba Ifá tradition, associated with the babalawo (the Ifá priests) and with the practice of divination. Its role as the anchor of the Ifá shrine and the seat of the priest's consultation is a continuous tradition from the ancient Yoruba kingdom to the present, and it survives in the Yoruba diaspora (in Cuba, Brazil, and the Caribbean) as a central element of the Ifá and the related orisha traditions. The ègbèsú is the botanical embodiment of the Ifá tradition's sacred center, and it is one of the most specific and functional of the Yoruba sacred trees.",
+  "details": "The ègbèsú is a 'functional' sacred tree — its sanctity is defined by its role in the Ifá divination, as the tree under which the priest sits to consult the oracle. It is the physical anchor of the sacred word and of the divine consultation, and its presence is a requirement for the priest's work. It is one of the clearest examples of a sacred tree whose holiness is defined by a specific ritual function rather than a general cosmological symbol.",
+  "symbolism": [
+   "the sacred word",
+   "the Ifá oracle",
+   "the priest's anchor",
+   "the channel of divine wisdom"
+  ],
+  "sources": [
+   "The Yoruba Ifá and babalawo (priest) tradition",
+   "The ègbèsú sacred-tree tradition of the Ifá shrine",
+   "The Yoruba diaspora (Ifá in Cuba, Brazil, and the Caribbean)"
+  ],
+  "emblem": {
+   "form": "branching",
+   "accent": "#7b4b2a",
+   "jewels": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Baobab_and_elephant%2C_Tanzania.jpg/500px-Baobab_and_elephant%2C_Tanzania.jpg",
+   "label": "Adansonia digitata",
+   "title": "Adansonia digitata"
+  }
+ },
+ {
+  "id": "dogon-tree",
+  "name": "The Sacred Tree of the Dogon Creation",
+  "native": "the Dogon sacred tree (the tree of the creation)",
+  "culture": "Dogon (Mali)",
+  "region": "africa",
+  "era": "Ancient; recorded in the 20th c. (Grossinger, Griaule)",
+  "type": "Creation / axis-mundi tree",
+  "tree": "A great tree (the tree from which the first being descended)",
+  "story": "In the Dogon creation myth, the supreme being Amma came down from the sky on a silver thread to create the world. When Amma had finished the creation, he planted a great tree at the center of the world — the tree of the creation — and then returned to the sky. The tree is the axis of the Dogon world, the point where the divine and the human meet, and the anchor of the world's order. The Dogon's sacred groves and their ritual trees are the living traces of that first planting, and the tree is the physical center of the Dogon cosmology and of their ritual life.",
+  "history": "The Dogon creation myth and its sacred tree are among the most widely studied of the West African cosmologies, recorded by the ethnographers Marcel Griaule and Germaine Dieterlen in the mid-20th century (and popularized in the literature of the Dogon). The sacred tree of the Dogon creation is the axis of the Dogon world, and it is a central feature of the Dogon ritual life and their sacred groves. The myth is one of the great creation narratives of West Africa, and the tree is its central image — the tree that Amma planted to anchor the world and to mark the point where the divine and the human meet.",
+  "details": "The Dogon sacred tree is a 'creation' sacred tree — its sanctity comes from being the first tree planted by the supreme being Amma, the anchor of the world's order. It is the axis of the Dogon cosmology and the physical center of their ritual life. It is one of the clearest examples of a sacred tree as the physical trace of a creation act, and it is a central element of the Dogon cosmology and one of the great creation narratives of West Africa.",
+  "symbolism": [
+   "the creation act",
+   "the axis of the world",
+   "the divine–human meeting point",
+   "the anchor of order"
+  ],
+  "sources": [
+   "Griaule, Marcel & Dieterlen, Germaine. The Pale Fox (the Dogon myth)",
+   "The Dogon creation myth and sacred-tree tradition",
+   "Ethnographic studies of the Dogon cosmology (Mali)"
+  ],
+  "emblem": {
+   "form": "tall",
+   "accent": "#d4763c",
+   "star": true
+  },
+  "photo": {
+   "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Yggdrasil.jpg/500px-Yggdrasil.jpg",
+   "label": "Tree of life",
+   "title": "Tree of life"
+  }
+ }
+];
+const REGIONS = {"ancient-near-east":"Ancient Near East","egypt":"Egypt","persia":"Persia & Zoroastrian","europe":"Europe","africa":"Africa","south-asia":"South Asia","southeast-asia":"Southeast Asia","east-asia":"East Asia","americas":"The Americas","oceania":"Oceania & Pacific"};
+const ORDER = ["europe","africa","egypt","ancient-near-east","persia","south-asia","southeast-asia","east-asia","americas","oceania"];
+const NS = "http://www.w3.org/2000/svg";
+const svg = document.getElementById('tree');
+let activeId = null, regionFocus = null;
+
+function el(tag, attrs){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+function qpoint(a, c, b, t){ const u=1-t; return [u*u*a[0]+2*u*t*c[0]+t*t*b[0], u*u*a[1]+2*u*t*c[1]+t*t*b[1]]; }
+function qdir(a, c, b, t){ const u=1-t; const dx=2*u*(c[0]-a[0])+2*t*(b[0]-c[0]), dy=2*u*(c[1]-a[1])+2*t*(b[1]-c[1]); const m=Math.hypot(dx,dy)||1; return [dx/m, dy/m]; }
+
+/* ---------- emblem glyphs (viewBox 40x40) ---------- */
+function glyphPaths(em){
+  const f = em.form||'round';
+  const p = [];
+  const canopy = {
+    round:   {c:[20,14], r:9},
+    conical: {tri:[[20,5],[11.5,25],[28.5,25]]},
+    tall:    {e:[20,13], rx:5.5, ry:10.5},
+    branching:{}, roots:{}, frond:{}, multi:{}
+  }[f];
+  const trunk = (y1,y2,w=1.8)=>p.push({d:`M20 ${y1} L20 ${y2}`, w});
+  if (f==='round'){ p.push({d:`M${20-9} 14 A9 9 0 1 0 ${20+9} 14 A9 9 0 1 0 ${20-9} 14 Z`, fill:.3}); trunk(23,32,2.4); }
+  if (f==='conical'){ p.push({d:`M20 5 L11.5 25 L28.5 25 Z`, fill:.3}); trunk(25,32,2.4); }
+  if (f==='tall'){ p.push({d:`M14.5 13 A5.5 10.5 0 1 0 25.5 13 A5.5 10.5 0 1 0 14.5 13 Z`, fill:.3}); trunk(23,32,2.2); }
+  if (f==='branching'){ trunk(32,17,2.2); p.push({d:'M20 23 L12 12',w:1.6},{d:'M20 20 L28 9',w:1.6},{d:'M12 12 L9 8',w:1.4},{d:'M28 9 L31 5.5',w:1.4},{d:'M20 17 L16 10',w:1.4}); }
+  if (f==='roots'){ p.push({d:'M15.5 12 A4.5 4.5 0 1 0 24.5 12 A4.5 4.5 0 1 0 15.5 12 Z', fill:.3}); trunk(16,25,2); p.push({d:'M20 25 L12 34',w:1.6},{d:'M20 25 L28 34',w:1.6},{d:'M20 25 L20 35',w:1.4},{d:'M12 34 L9 33',w:1.2},{d:'M28 34 L31 33',w:1.2}); }
+  if (f==='frond'){ trunk(33,13,2); p.push({d:'M20 13 C13 8 8 11 5 7',w:1.6},{d:'M20 13 C27 8 32 11 35 7',w:1.6},{d:'M20 13 C14 16 9 15 6 18',w:1.4},{d:'M20 13 C26 16 31 15 34 18',w:1.4}); }
+  if (f==='multi'){ p.push({d:'M9 13 A5 5 0 1 0 19 13 A5 5 0 1 0 9 13 Z', fill:.3},{d:'M21 13 A5 5 0 1 0 31 13 A5 5 0 1 0 21 13 Z', fill:.3},{d:'M15 24 A5 5 0 1 0 25 24 A5 5 0 1 0 15 24 Z', fill:.3}); trunk(33,29,1.4); p.push({d:'M20 33 L14 17',w:1.2},{d:'M20 33 L26 17',w:1.2}); }
+  /* features */
+  if (em.fruit) p.push({d:'M15 12 A1.7 1.7 0 1 0 18.4 12 A1.7 1.7 0 1 0 15 12 Z'},{d:'M23.5 16 A1.7 1.7 0 1 0 26.9 16 A1.7 1.7 0 1 0 23.5 16 Z'});
+  if (em.star) p.push({d:'M20 1.5 L21.6 4.5 L24.6 6 L21.6 7.5 L20 10.5 L18.4 7.5 L15.4 6 L18.4 4.5 Z', fill:1});
+  if (em.jewels) p.push({d:'M31 9 L32.2 11.4 L34.6 12.6 L32.2 13.8 L31 16.2 L29.8 13.8 L27.4 12.6 L29.8 11.4 Z', fill:1});
+  if (em.bands) p.push({d:'M13 12 L27 12', w:1.1},{d:'M13.5 16.5 L26.5 16.5', w:1.1});
+  if (em.cascade) p.push({d:'M33 10 C35.5 13 30.5 15 33 18 C35 20.5 31 22.5 33 25', w:1.4});
+  if (em.fronds) p.push({d:'M8 30 C11 27 14 29 16 31', w:1.2},{d:'M24 31 C27 28 30 30 33 28', w:1.2});
+  if (em.wells) p.push({d:'M9 36 C14 39 26 39 31 36', w:1.3, dash:'3 2.6'});
+  if (em.wind) p.push({d:'M6 16 C9 15 11 17 9.5 19.5', w:1.3},{d:'M4 21 C8 20 11 22 9 24.5', w:1.3});
+  if (em.bolt) p.push({d:'M24 2 L18.5 10 L22.5 10 L16.5 19', w:1.5});
+  return p;
+}
+function emblemSVG(em, size){
+  const col = em.accent || '#c9a86a';
+  let inner = '';
+  for (const g of glyphPaths(em)){
+    if (g.fill){ inner += `<path d="${g.d}" fill="${col}" fill-opacity="${g.fill===1?0.95:0.35}" stroke="none"/>`; }
+    else { inner += `<path d="${g.d}" fill="none" stroke="${col}" stroke-width="${g.w||1.6}" stroke-linecap="round" stroke-linejoin="round"${g.dash?` stroke-dasharray="${g.dash}"`:''}/>`; }
+  }
+  return `<svg viewBox="0 0 40 40" width="${size}" height="${size}" aria-hidden="true">${inner}</svg>`;
+}
+
+/* ---------- tree geometry ---------- */
+const TIPS = {
+  "europe":[148,712], "africa":[96,532], "egypt":[152,352], "ancient-near-east":[300,214], "persia":[448,126],
+  "south-asia":[556,122], "southeast-asia":[704,210], "east-asia":[856,348], "americas":[908,528], "oceania":[854,708]
+};
+const ATTACH = {
+  "europe":[489,848], "africa":[494,752], "egypt":[497,662], "ancient-near-east":[499,586], "persia":[500,534],
+  "south-asia":[501,538], "southeast-asia":[502,592], "east-asia":[504,668], "americas":[506,758], "oceania":[511,852]
+};
+const groups = {};
+DATA.forEach(t => (groups[t.region] = groups[t.region] || []).push(t));
+
+function build(){
+  /* defs: glow filter + gradient */
+  const defs = el('defs',{});
+  defs.innerHTML = `
+    <radialGradient id="bgGlow" cx="50%" cy="42%" r="55%">
+      <stop offset="0%" stop-color="#1d3327" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#1d3327" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="trunkG" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#2c3a31"/>
+      <stop offset="100%" stop-color="#1e2a22"/>
+    </linearGradient>`;
+  svg.appendChild(defs);
+  svg.appendChild(el('ellipse',{cx:500,cy:470,rx:430,ry:420,class:'glow',fill:'url(#bgGlow)'}));
+  /* ground */
+  svg.appendChild(el('ellipse',{cx:500,cy:952,rx:210,ry:14,class:'ground'}));
+  /* trunk */
+  const trunk = el('path',{class:'trunk', d:'M471 952 C481 830 486 690 494 536 L506 536 C514 690 519 830 529 952 C512 944 488 944 471 952 Z', fill:'url(#trunkG)'});
+  svg.appendChild(trunk);
+  /* branches + nodes per region */
+  for (const r of ORDER){
+    const a = ATTACH[r], b = TIPS[r];
+    const dx=b[0]-a[0], dy=b[1]-a[1];
+    const nx=-dy, ny=dx, m=Math.hypot(nx,ny)||1;
+    const side = (b[0] < a[0]) ? 1 : -1; /* bulge outward */
+    const c = [(a[0]+b[0])/2 + (nx/m)*34*side, (a[1]+b[1])/2 + (ny/m)*34*side];
+    const bg = el('g',{class:'rlabel','data-region':r});
+    bg.appendChild(el('path',{class:'branch', d:`M${a[0]} ${a[1]} Q${c[0]} ${c[1]} ${b[0]} ${b[1]}`, 'stroke-width': r==='egypt'||r==='persia' ? 5 : 6.5}));
+    /* label position: outward from tip */
+    const dir = [b[0]-a[0], b[1]-a[1]], lm=Math.hypot(dir[0],dir[1])||1;
+    const ux=dir[0]/lm, uy=dir[1]/lm;
+    const lx = b[0]+ux*26, ly = b[1]+uy*26;
+    const anchor = Math.abs(ux)<0.35 ? 'middle' : (ux>0?'start':'end');
+    const name = el('text',{x:lx, y:ly+ (uy>0.4? 8 : uy<-0.4? -12 : 4), 'text-anchor':anchor});
+    name.textContent = REGIONS[r].toUpperCase();
+    bg.appendChild(name);
+    const cnt = el('text',{x:lx, y:ly+22+(uy>0.4? 8:0), class:'rcount','text-anchor':anchor});
+    cnt.textContent = `${groups[r].length} trees`;
+    bg.appendChild(cnt);
+    bg.addEventListener('click', ()=>toggleRegion(r));
+    svg.appendChild(bg);
+
+    const trees = groups[r].slice().sort((x,y)=>x.name.localeCompare(y.name));
+    trees.forEach((t,i)=>{
+      const n = trees.length;
+      const ti = n===1 ? 0.72 : 0.40 + 0.54*(i/(n-1));
+      const p = qpoint(a,c,b,ti);
+      const d = qdir(a,c,b,ti);
+      const off = (i%2===0?1:-1) * 26;
+      const px = p[0] + (-d[1])*off, py = p[1] + d[0]*off;
+      const node = el('g',{class:'node','data-id':t.id,'data-region':t.region, transform:`translate(${px} ${py})`});
+      node.style.color = t.emblem.accent||'#c9a86a';
+      node.appendChild(el('circle',{class:'body', r:17, stroke:t.emblem.accent||'#c9a86a'}));
+      const g = el('g',{transform:'translate(-11 -11)'});
+      g.innerHTML = emblemSVG(t.emblem, 22);
+      node.appendChild(g);
+      node.addEventListener('click', ev=>{ ev.stopPropagation(); openPanel(t); });
+      svg.appendChild(node);
+    });
+  }
+  document.getElementById('count').textContent = `${DATA.length} trees · ${ORDER.length} regions`;
+  document.getElementById('subtitle').textContent = `Sacred & mythic trees of the world — ${DATA.length} traditions across ${ORDER.length} regions`;
+}
+
+/* ---------- interactions ---------- */
+function openPanel(t){
+  activeId = t.id;
+  document.querySelectorAll('.node').forEach(n=>n.classList.toggle('active', n.dataset.id===t.id));
+  const meta = [['Region', REGIONS[t.region]],['Culture',t.culture],['Era',t.era],['Type',t.type],['Tree',t.tree],['Region id',null]];
+  const mEl = document.getElementById('p-meta');
+  mEl.innerHTML = [['Region',REGIONS[t.region]],['Culture',t.culture],['Era',t.era],['Type',t.type],['Tree',t.tree]]
+    .map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+  document.getElementById('p-emblem').innerHTML = emblemSVG(t.emblem, 64);
+  document.getElementById('p-name').textContent = t.name;
+  document.getElementById('p-native').textContent = t.native;
+  const body = document.getElementById('p-body');
+  const photo = t.photo ? `<figure class="p-photo"><img src="${t.photo.url}" alt="${t.photo.label}" loading="lazy" onerror="this.closest('.p-photo').remove()"><figcaption>${t.photo.label} · species photo via Wikimedia Commons (Creative Commons)</figcaption></figure>` : '';
+  let h = photo + `<h3>The Story</h3><p>${t.story}</p>
+           <h3>History</h3><p>${t.history}</p>
+           <h3>Details</h3><p>${t.details}</p>
+           <h3>Symbolism</h3><div class="chips">${t.symbolism.map(s=>`<span class="chip">${s}</span>`).join('')}</div>
+           <h3>Sources</h3><ul class="src">${t.sources.map(s=>`<li>${s}</li>`).join('')}</ul>
+           <div class="footer-note">Compiled from primary religious texts, comparative mythology, and botanical references. Names in original scripts given where standard. Species photos via Wikimedia Commons (Creative Commons licenses).</div>`;
+  body.innerHTML = h;
+  body.scrollTop = 0;
+  const p = document.getElementById('panel');
+  p.classList.add('open'); p.setAttribute('aria-hidden','false');
+  document.getElementById('hint').style.opacity = 0;
+}
+function closePanel(){
+  activeId = null;
+  document.querySelectorAll('.node.active').forEach(n=>n.classList.remove('active'));
+  const p = document.getElementById('panel');
+  p.classList.remove('open'); p.setAttribute('aria-hidden','true');
+}
+function toggleRegion(r){
+  regionFocus = (regionFocus===r) ? null : r;
+  applyFilter();
+}
+function applyFilter(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const matches = t => !q || (t.name+' '+t.culture+' '+t.tree+' '+t.type+' '+t.native).toLowerCase().includes(q);
+  document.querySelectorAll('.node').forEach(n=>{
+    const t = DATA.find(x=>x.id===n.dataset.id);
+    const ok = matches(t) && (!regionFocus || t.region===regionFocus);
+    n.classList.toggle('dim', !ok);
+  });
+  document.querySelectorAll('.rlabel').forEach(l=>l.classList.toggle('dim', !!regionFocus && l.dataset.region!==regionFocus));
+}
+document.getElementById('search').addEventListener('input', applyFilter);
+document.getElementById('close').addEventListener('click', closePanel);
+document.addEventListener('keydown', e=>{ if (e.key==='Escape') closePanel(); });
+build();
+</script>
+</body>
+</html>
