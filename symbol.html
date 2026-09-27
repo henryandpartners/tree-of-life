@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Symbols &amp; Art — Tree of Life</title>
+<meta name="description" content="A gallery of 21 Tree of Life symbols and artworks from eleven world traditions — Kabbalistic diagrams, sacred mosaics, carpets, world-trees and living ceibas.">
+<style>
+  :root{
+    --bg0:#070b09; --bg1:#0d1512; --ink:#e8e2d4; --ink-dim:#9aa392;
+    --line:#2a3a30; --panel:#0f1713; --node:#141d18; --gold:#c9a86a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family: Georgia,'Iowan Old Style','Palatino Linotype',serif;
+    background: radial-gradient(120% 90% at 50% 8%, var(--bg1) 0%, var(--bg0) 72%);
+    color:var(--ink); overflow:hidden;
+  }
+  a{color:var(--gold); text-decoration:none}
+  a:hover{text-decoration:underline}
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:20;
+    display:flex; align-items:center; gap:16px; padding:14px 22px;
+    background:linear-gradient(180deg, rgba(7,11,9,.94), rgba(7,11,9,.6) 82%, transparent);
+    backdrop-filter: blur(6px);
+  }
+  .brand{display:flex; align-items:center; gap:12px; min-width:0}
+  .brand svg{width:34px;height:34px;flex:none}
+  .brand .txt{min-width:0}
+  .brand h1{font-size:17px; letter-spacing:.22em; font-weight:600; white-space:nowrap}
+  .brand .sub{font-size:11.5px; color:var(--ink-dim); letter-spacing:.05em; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .back{
+    display:flex; align-items:center; gap:7px; cursor:pointer;
+    font:inherit; font-size:13px; letter-spacing:.04em; color:var(--ink-dim);
+    background:transparent; border:1px solid var(--line); border-radius:999px;
+    padding:8px 14px; transition:all .2s; white-space:nowrap;
+  }
+  .back:hover{color:var(--ink); border-color:var(--gold); text-decoration:none}
+  header .spacer{flex:1}
+  #search{
+    background:rgba(20,29,24,.8); border:1px solid var(--line); color:var(--ink);
+    border-radius:999px; padding:8px 16px; font:inherit; font-size:13.5px; width:220px;
+    outline:none; transition:border-color .2s, width .25s;
+  }
+  #search:focus{border-color:var(--gold); width:270px}
+  #search::placeholder{color:#6d786b}
+  #count{font-size:12px; color:var(--ink-dim); letter-spacing:.06em; white-space:nowrap}
+
+  /* filter bar */
+  #filters{
+    position:fixed; top:66px; left:0; right:0; z-index:19;
+    display:flex; flex-direction:column; gap:8px; padding:14px 22px 16px;
+    background:linear-gradient(180deg, rgba(7,11,9,.72), rgba(7,11,9,.35) 80%, transparent);
+  }
+  .frow{display:flex; align-items:center; gap:9px; flex-wrap:wrap}
+  .frow .lbl{font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); opacity:.8; width:88px; flex:none}
+  .chip{
+    font:inherit; font-size:12.5px; cursor:pointer;
+    border:1px solid var(--line); border-radius:999px; padding:5px 13px;
+    color:#cfd6c6; background:rgba(255,255,255,.02); transition:all .18s;
+  }
+  .chip:hover{border-color:#43554a; color:var(--ink)}
+  .chip.on{background:rgba(201,168,106,.16); border-color:var(--gold); color:#f0e2c2}
+  #clear{cursor:pointer; font:inherit; font-size:12px; color:var(--ink-dim); background:none; border:none; letter-spacing:.04em}
+  #clear:hover{color:var(--gold); text-decoration:underline}
+
+  main{position:absolute; top:132px; left:0; right:0; bottom:0; overflow-y:auto; padding:8px 22px 60px}
+  #grid{
+    display:grid; gap:18px; max-width:1500px; margin:0 auto;
+    grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));
+  }
+  .card{
+    border:1px solid var(--line); border-radius:14px; overflow:hidden; cursor:pointer;
+    background:var(--panel); transition:transform .2s, border-color .2s, box-shadow .2s;
+    display:flex; flex-direction:column;
+  }
+  .card:hover{transform:translateY(-3px); border-color:#43554a; box-shadow:0 14px 34px rgba(0,0,0,.42)}
+  .card.active{border-color:var(--gold); box-shadow:0 0 0 1px var(--gold), 0 14px 34px rgba(0,0,0,.5)}
+  .card .img{position:relative; height:230px; background:#0a100d; overflow:hidden}
+  .card .img img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .35s}
+  .card:hover .img img{transform:scale(1.05)}
+  .card .img .badge{
+    position:absolute; top:10px; left:10px; font-size:10.5px; letter-spacing:.08em;
+    color:#e9dfc9; background:rgba(7,11,9,.72); border:1px solid var(--line);
+    padding:3px 9px; border-radius:999px; backdrop-filter:blur(4px);
+  }
+  .card .img .lic{
+    position:absolute; bottom:10px; right:10px; font-size:9.5px; letter-spacing:.06em;
+    color:#b9c1b0; background:rgba(7,11,9,.72); padding:2px 8px; border-radius:999px; border:1px solid var(--line);
+  }
+  .card .cap{padding:13px 15px 15px}
+  .card .name{font-size:15.5px; line-height:1.3; font-weight:600}
+  .card .sub2{font-size:12px; color:var(--ink-dim); margin-top:5px; line-height:1.45}
+  #empty{grid-column:1/-1; text-align:center; color:var(--ink-dim); font-size:14px; padding:70px 0; line-height:1.8}
+
+  /* detail panel */
+  #panel{
+    position:fixed; top:0; right:0; bottom:0; width:min(520px, 96vw); z-index:30;
+    background:var(--panel); border-left:1px solid var(--line);
+    transform:translateX(105%); transition:transform .35s cubic-bezier(.22,.8,.3,1);
+    display:flex; flex-direction:column;
+  }
+  #panel.open{transform:translateX(0); box-shadow:-30px 0 60px rgba(0,0,0,.5)}
+  .p-head{position:relative; padding:26px 28px 18px; border-bottom:1px solid var(--line); background:radial-gradient(90% 130% at 20% 0%, rgba(255,255,255,.03), transparent)}
+  #close{
+    position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%;
+    border:1px solid var(--line); background:transparent; color:var(--ink-dim);
+    font-size:15px; cursor:pointer; line-height:1; transition:all .2s;
+  }
+  #close:hover{color:var(--ink); border-color:var(--gold)}
+  .p-kicker{font-size:10.5px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); opacity:.85}
+  #panel h2{font-size:23px; line-height:1.25; font-weight:600; margin-top:8px; padding-right:36px}
+  .meta{display:grid; grid-template-columns:1fr 1fr; gap:11px 16px; margin-top:18px}
+  .meta .k{font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); opacity:.85}
+  .meta .v{font-size:13.5px; line-height:1.45; margin-top:2px}
+  .p-body{overflow-y:auto; padding:22px 28px 44px; flex:1; scrollbar-width:thin; scrollbar-color:#2a3a30 transparent}
+  .p-img{margin:0 0 18px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:#0a100d; display:flex; align-items:center; justify-content:center; min-height:120px}
+  .p-img img{max-width:100%; max-height:430px; object-fit:contain; display:block}
+  .p-img figcaption{font-size:11px; color:#5c685c; line-height:1.55; padding:8px 12px; border-top:1px solid var(--line); width:100%}
+  .p-body h3{font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin:24px 0 9px; font-weight:600}
+  .p-body h3:first-child{margin-top:0}
+  .p-body p{font-size:14.5px; line-height:1.72; color:#d6d2c4}
+  .credit{font-size:13px; color:#c9c4b4; line-height:1.6}
+  .lic-line{display:flex; flex-wrap:wrap; gap:7px; align-items:center}
+  .lic-chip{font-size:11.5px; border:1px solid var(--line); border-radius:999px; padding:3px 11px; color:#cfd6c6; background:rgba(255,255,255,.02)}
+  .src-link{display:inline-block; margin-top:2px; font-size:13.5px}
+  .footer-note{font-size:11px; color:#5c685c; line-height:1.6; margin-top:26px; border-top:1px solid var(--line); padding-top:14px}
+
+  @media (max-width:900px){
+    .brand .sub{display:none}
+    #search{width:150px}
+    #count{display:none}
+    .frow .lbl{width:auto; flex:1 1 100%}
+  }
+</style>
+</head>
+<body>
+<header>
+  <button class="back" id="back" onclick="location.href='index.html'">
+    <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M15 5 L8 12 L15 19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span>Atlas</span>
+  </button>
+  <div class="brand">
+    <svg viewBox="0 0 40 40" aria-hidden="true">
+      <path d="M20 36 L20 20 M20 24 L12 13 M20 22 L28 11 M12 13 L9 9 M28 11 L31 7" stroke="#c9a86a" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="20" cy="36" r="2.4" fill="#c9a86a"/>
+    </svg>
+    <div class="txt">
+      <h1>TREE OF LIFE</h1>
+      <div class="sub">Symbols &amp; Art of the World</div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <input id="search" type="text" placeholder="Search symbols, cultures, forms…" autocomplete="off" spellcheck="false">
+  <div id="count"></div>
+</header>
+
+<div id="filters">
+  <div class="frow" id="civrow"><span class="lbl">Tradition</span></div>
+  <div class="frow" id="typerow"><span class="lbl">Form</span></div>
+</div>
+
+<main id="main">
+  <div id="grid"></div>
+</main>
+
+<aside id="panel" aria-hidden="true">
+  <div class="p-head">
+    <button id="close" aria-label="Close">✕</button>
+    <div class="p-kicker" id="p-kicker"></div>
+    <h2 id="p-name"></h2>
+    <div class="meta" id="p-meta"></div>
+  </div>
+  <div class="p-body" id="p-body"></div>
+</aside>
+
+<script>
+const DATA = [{"id": "Tree of life bahir Hebrew.svg", "name": "The Tree of Life (Kabbalah)", "civ": "Jewish & Kabbalistic", "era": "Medieval (c. 12th c.)", "type": "Diagram", "location": "Kabbalistic tradition", "desc": "Ten luminous sefirot linked by twenty-two paths, traced to the Zohar and the medieval book Bahir — the canonical diagram of the Kabbalistic Tree of Life.", "credit": "Diagram after the Bahir / Zohar; public domain", "license": "Public domain", "artist": "User:AnonMoos", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/91/Tree_of_life_bahir_Hebrew.svg/960px-Tree_of_life_bahir_Hebrew.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/9/91/Tree_of_life_bahir_Hebrew.svg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Tree_of_life_bahir_Hebrew.svg", "w": 395, "h": 750}, {"id": "Kircher Tree of Life", "name": "Kircher's Tree of Life", "civ": "Christian (Western)", "era": "1653", "type": "Diagram", "location": "Rome, Italy", "desc": "Athanasius Kircher's engraved Tree of Life from Oedipus Aegyptiacus, fusing the ten sefirot with the Tree of Jesse and Egyptian cosmology into a single allegorical system.", "credit": "Engraving by Athanasius Kircher, S.J.; public domain", "license": "Public domain", "artist": "", "img": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Tree_of_life_kircher_plain_color.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled", "full": "https://upload.wikimedia.org/wikipedia/commons/6/6b/Tree_of_life_kircher_plain_color.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Tree_of_life_kircher_plain_color.png", "w": 334, "h": 631}, {"id": "Chartres Jesse Tree", "name": "Tree of Jesse (Chartres Rose)", "civ": "Christian (Western)", "era": "c. 1145–1155", "type": "Architectural", "location": "Chartres, France", "desc": "The Tree of Jesse from the west-rose window of Chartres Cathedral: Christ at the crown, the patriarchs in the branches, and the kings of Judah in the roots — a stained-glass genealogy of salvation.", "credit": "Chartres Cathedral glass; public domain (photo C. H. Moore, 1840–1930)", "license": "Public domain", "artist": "Charles Herbert Moore (1840-1930)", "img": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Fig_191_-Figure_from_the_Jesse_Window%2C_Chartres.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled", "full": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Fig_191_-Figure_from_the_Jesse_Window%2C_Chartres.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Fig_191_-Figure_from_the_Jesse_Window,_Chartres.jpg", "w": 344, "h": 774}, {"id": "Bernwardstür", "name": "Bernward Doors — Christ on the Tree of Life", "civ": "Christian (Western)", "era": "c. 1015", "type": "Sculpture", "location": "Hildesheim, Germany", "desc": "The Bernward Doors, bronze gate of Hildesheim Cathedral: Christ on the Tree of Life, flanked by the Fall in Eden and the Redemption in Gethsemane — an Ottonian statement of the cross as the tree of life.", "credit": "Bronze by the workshop of Bernward of Hildesheim; photo © Bishop's Press Office Hildesheim, CC BY", "license": "Attribution", "artist": "Bischöfliche Pressestelle Hildesheim (bph)", "img": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Bernwardst%C3%BCr.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled", "full": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Bernwardst%C3%BCr.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Bernwardst%C3%BCr.jpg", "w": 776, "h": 1679}, {"id": "Book of Kells ChiRho", "name": "Chi-Rho Page, Book of Kells", "civ": "Christian (Western)", "era": "c. 800", "type": "Manuscript", "location": "Ireland (Trinity College, Dublin)", "desc": "The Chi-Rho page of the Book of Kells, the IHS monogram of the Word wrapped in interlaced vines, knots and tendrils — an Insular gospel book where the living tree becomes woven ornament.", "credit": "Book of Kells, Irish scribes; public domain", "license": "Public domain", "artist": "unknown Irish or Scottish monks", "img": "https://upload.wikimedia.org/wikipedia/commons/9/98/Book_of_Kells_ChiRho_Folio_34R.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled", "full": "https://upload.wikimedia.org/wikipedia/commons/9/98/Book_of_Kells_ChiRho_Folio_34R.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Book_of_Kells_ChiRho_Folio_34R.png", "w": 484, "h": 641}, {"id": "Dore Adam and Eve", "name": "Adam and Eve under the Tree of Life (Doré)", "civ": "Christian (Western)", "era": "1865–66", "type": "Painting", "location": "Paris, France", "desc": "Gustave Doré's 'Adam and Eve under the Tree of Life': the serpent on the forbidden tree and the Tree of Life beyond, an engraved illustration from his edition of the Bible.", "credit": "Wood engraving by Gustave Doré; public domain", "license": "Public domain", "artist": "Gustave Doré", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Adam_and_Eve_Driven_out_of_Eden.png/960px-Adam_and_Eve_Driven_out_of_Eden.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/1/13/Adam_and_Eve_Driven_out_of_Eden.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Adam_and_Eve_Driven_out_of_Eden.png", "w": 961, "h": 1210}, {"id": "Ishtar Gate lion", "name": "Ishtar Gate & Processional Way", "civ": "Mesopotamian", "era": "c. 575 BCE", "type": "Relief", "location": "Babylon (Neo-Babylonian)", "desc": "The glazed-brick lion procession of the Ishtar Gate of Babylon, where sacred trees and lions line the processional way — the garden of Marduk rendered in blue brick.", "credit": "Ishtar Gate, Nebuchadnezzar II; photo © 0x010C, CC BY-SA 4.0", "license": "CC BY-SA 4.0", "artist": "0x010C", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3f/2015-12_Panneau_de_briques_-_lion_passant_AO_21118.jpg/960px-2015-12_Panneau_de_briques_-_lion_passant_AO_21118.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/3/3f/2015-12_Panneau_de_briques_-_lion_passant_AO_21118.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:2015-12_Panneau_de_briques_-_lion_passant_AO_21118.jpg", "w": 5573, "h": 2593}, {"id": "Stele of the Vultures", "name": "Stele of the Vultures", "civ": "Mesopotamian", "era": "c. 2450 BCE", "type": "Sculpture", "location": "Lagash (Sumer), now Louvre", "desc": "The Stele of the Vultures: Gudea of Lagash laying out his temple, with a sacred tree and the vultures of the underworld — Sumerian royal iconography of the sacred tree.", "credit": "Stele of Gudea, Louvre; photo © Kikuyu3, CC BY-SA 4.0", "license": "CC BY-SA 4.0", "artist": "Background: Kikuyu3\nElements: Eric Gaba (User:Sting)\n\nComposite: पाटलिपुत्र (talk) 10:52, 30 April 2020 (UTC)", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Stele_of_the_Vultures_in_the_Louvre_Museum_%28enhanced_composite%29.jpg/960px-Stele_of_the_Vultures_in_the_Louvre_Museum_%28enhanced_composite%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/1/13/Stele_of_the_Vultures_in_the_Louvre_Museum_%28enhanced_composite%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Stele_of_the_Vultures_in_the_Louvre_Museum_(enhanced_composite).jpg", "w": 9344, "h": 6384}, {"id": "Thutmose III and tree", "name": "Thutmose III and the Tree of Heaven", "civ": "Egyptian", "era": "c. 1425 BCE", "type": "Painting", "location": "Tomb of Thutmose III, Valley of the Kings", "desc": "Thutmose III seated beneath the sycamore (the 'tree of heaven') of Hathor, the goddess of the West — the Egyptian sacred tree of the afterlife in a Theban tomb painting.", "credit": "Wall painting, Valley of the Kings; public domain", "license": "Public domain", "artist": "", "img": "https://upload.wikimedia.org/wikipedia/commons/3/33/KV34_decoration_1932_Litany_of_Ra_Pillar_1D_%28Thutmose_III_and_tree%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled", "full": "https://upload.wikimedia.org/wikipedia/commons/3/33/KV34_decoration_1932_Litany_of_Ra_Pillar_1D_%28Thutmose_III_and_tree%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:KV34_decoration_1932_Litany_of_Ra_Pillar_1D_(Thutmose_III_and_tree).jpg", "w": 383, "h": 526}, {"id": "Buddha Bodhi tree Gandhara", "name": "Buddha beneath the Bodhi Tree", "civ": "Buddhist", "era": "2nd c. CE", "type": "Sculpture", "location": "Jamal Garhi, Gandhara (Pakistan)", "desc": "The Buddha beneath the Bodhi tree at Jamal Garhi: the wheel of dharma turning, the tree of awakening that frames the first sermon — Greco-Buddhist schist sculpture of the Enlightenment.", "credit": "Gandharan schist, 2nd c. CE; photo © SpeakingArch, CC BY-SA 4.0", "license": "CC BY-SA 4.0", "artist": "SpeakingArch", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5e/Buddha%27s_approach_to_the_Bodhi_tree%2C_2nd_Century_CE%2C_Jamalgarhi%2C_housed_in_Indian_Museum_Kolkata.jpg/960px-Buddha%27s_approach_to_the_Bodhi_tree%2C_2nd_Century_CE%2C_Jamalgarhi%2C_housed_in_Indian_Museum_Kolkata.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/5/5e/Buddha%27s_approach_to_the_Bodhi_tree%2C_2nd_Century_CE%2C_Jamalgarhi%2C_housed_in_Indian_Museum_Kolkata.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Buddha%27s_approach_to_the_Bodhi_tree,_2nd_Century_CE,_Jamalgarhi,_housed_in_Indian_Museum_Kolkata.jpg", "w": 1198, "h": 639}, {"id": "Penglai scene", "name": "Penglai, the Island of the Immortals", "civ": "Chinese", "era": "Tang dynasty (8th c.) tradition", "type": "Painting", "location": "China", "desc": "Penglai, the island of the Immortals rising from the sea, with the peach tree of immortality — a Tang-dynasty tradition of the celestial tree of eternal life in the far-east seas.", "credit": "After Li Sixun (Li Po-chun); public domain", "license": "Public domain", "artist": "", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e3/Penglai_scene_in_a_copy_of_a_painting_by_Leng_Qian_%28Li_Sixun%27s_follower%29.jpg/960px-Penglai_scene_in_a_copy_of_a_painting_by_Leng_Qian_%28Li_Sixun%27s_follower%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Penglai_scene_in_a_copy_of_a_painting_by_Leng_Qian_%28Li_Sixun%27s_follower%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Penglai_scene_in_a_copy_of_a_painting_by_Leng_Qian_(Li_Sixun%27s_follower).jpg", "w": 3901, "h": 2327}, {"id": "Bronze Money Tree Sanxingdui", "name": "Bronze Money Tree (Sanxingdui)", "civ": "Chinese", "era": "Han dynasty (206 BCE–220 CE)", "type": "Sculpture", "location": "Sanxingdui, Sichuan, China", "desc": "A bronze Money Tree from the Sanxingdui culture: a three-branched trunk crowned with perched birds, a dragon and jade — a Han-world axis mundi of wealth and the cosmos.", "credit": "Bronze, Sanxingdui Museum; photo © Gary Todd, CC0", "license": "CC0", "artist": "Gary Todd", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7a/Bronze_Money_Tree%2C_Han_Dynasty%2C_Sanxingdui_Museum_a.jpg/960px-Bronze_Money_Tree%2C_Han_Dynasty%2C_Sanxingdui_Museum_a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Bronze_Money_Tree%2C_Han_Dynasty%2C_Sanxingdui_Museum_a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Bronze_Money_Tree,_Han_Dynasty,_Sanxingdui_Museum_a.jpg", "w": 2592, "h": 3888}, {"id": "Tikal Ceiba Axis Mundi", "name": "The Ceiba of Tikal (Axis Mundi)", "civ": "Maya", "era": "Classic Maya period", "type": "Living tree", "location": "Tikal, Guatemala", "desc": "The great ceiba of Tikal, the Maya world-tree whose roots drink from Xibalba and whose canopy holds the gods — the living ceiba that the Classic Maya cities grew around.", "credit": "Ceiba pentandra, Tikal National Park; photo CC0 (Flickr)", "license": "CC0", "artist": "Gary Todd from Xinzheng, China", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/Tikal_Ceiba_Tree_National_Tree_of_Guatemala_%26_Axis_Mundi_of_Maya_%289791188286%29.jpg/960px-Tikal_Ceiba_Tree_National_Tree_of_Guatemala_%26_Axis_Mundi_of_Maya_%289791188286%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/6/60/Tikal_Ceiba_Tree_National_Tree_of_Guatemala_%26_Axis_Mundi_of_Maya_%289791188286%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Tikal_Ceiba_Tree_National_Tree_of_Guatemala_%26_Axis_Mundi_of_Maya_(9791188286).jpg", "w": 1600, "h": 1200}, {"id": "Ghashghai Tree of Life carpet", "name": "Ghashghai Carpet — Tree of Life Medallion", "civ": "Persian", "era": "19th c.", "type": "Carpet", "location": "Shiraz, Iran", "desc": "A 19th-century Shiraz (Ghashghai) carpet whose central medallion blooms with the Tree of Life, its branches unfurling pomegranates, roses and vine-scroll — the Persian carpet's garden of paradise.", "credit": "Shiraz weavers, 19th c.; photo CC0 (Hiart)", "license": "CC0", "artist": "Hiart", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/Ghashghai_Tree_of_Life_carpet_from_Shiraz%2C_Iran%2C_wool.JPG/960px-Ghashghai_Tree_of_Life_carpet_from_Shiraz%2C_Iran%2C_wool.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Ghashghai_Tree_of_Life_carpet_from_Shiraz%2C_Iran%2C_wool.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Ghashghai_Tree_of_Life_carpet_from_Shiraz,_Iran,_wool.JPG", "w": 2268, "h": 3756}, {"id": "Kermanshah Tree of Life", "name": "Kermanshah Carpet — Tree of Life", "civ": "Persian", "era": "19th c. (late)", "type": "Carpet", "location": "Kermanshah, Iran", "desc": "A late-19th-century Kermanshah carpet: a serpentine Tree of Life flanked by the four paradises, its boughs heavy with fruit — the Persian garden-of-Paradise rendered in wool and silk.", "credit": "Kermanshah weavers, 19th c.; public domain", "license": "Public domain", "artist": "Anonymous", "img": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Persian_Kermanshah_%27Tree_of_Life%27_%284-6_x_7-8%2C_ca_3rd_quarter_19th_century%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled", "full": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Persian_Kermanshah_%27Tree_of_Life%27_%284-6_x_7-8%2C_ca_3rd_quarter_19th_century%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Persian_Kermanshah_%27Tree_of_Life%27_(4-6_x_7-8,_ca_3rd_quarter_19th_century).jpg", "w": 383, "h": 640}, {"id": "Tane Mahuta", "name": "Tāne Mahuta, the Great Kauri", "civ": "Māori / Pacific", "era": "Living (c. 1,500–2,000 yrs)", "type": "Living tree", "location": "Waipoua Forest, New Zealand", "desc": "Tāne Mahuta, the great kauri of the Waipoua Forest, the 'Guardian of the Forest' — one of the largest and oldest living trees on Earth, a Māori taonga (treasure) of the world-tree.", "credit": "Kauri (Agathis australis), Waipoua Forest; photo CC BY 2.0 (Flickr)", "license": "CC BY 2.0", "artist": "Sids1 from New Zealand", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/Tane_Mahuta_%28Lord_of_the_Forest%29.jpg/960px-Tane_Mahuta_%28Lord_of_the_Forest%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/b/b4/Tane_Mahuta_%28Lord_of_the_Forest%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Tane_Mahuta_(Lord_of_the_Forest).jpg", "w": 2044, "h": 2692}, {"id": "Ash Yggdrasil Heine", "name": "Yggdrasil (Heine)", "civ": "Norse", "era": "1886", "type": "Painting", "location": "Oslo, Norway", "desc": "F. W. Heine's 'Yggdrasil': the great ash of the Norse cosmos, its branches over the nine worlds, with the dragon NídhoŁgn gnawing the roots — a 19th-century romantic revival of the world-tree.", "credit": "Oil by Friedrich Wilhelm Heine; public domain", "license": "Public domain", "artist": "Friedrich Wilhelm Heine", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/The_Ash_Yggdrasil_by_Friedrich_Wilhelm_Heine.jpg/960px-The_Ash_Yggdrasil_by_Friedrich_Wilhelm_Heine.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/8/8d/The_Ash_Yggdrasil_by_Friedrich_Wilhelm_Heine.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:The_Ash_Yggdrasil_by_Friedrich_Wilhelm_Heine.jpg", "w": 2046, "h": 2622}, {"id": "Yggdrasil Mundane Tree 1847", "name": "Yggdrasil (Mundane Tree, Bagge)", "civ": "Norse", "era": "1847", "type": "Painting", "location": "Denmark", "desc": "Oluf Bagge's 'Mundane Tree' (Yggdrasil): the ash of the Norse world, the eagle on its crown and the serpent in its roots — a mid-19th-century depiction of the nine-world axis.", "credit": "Oil by Oluf Bagge; public domain", "license": "Public domain", "artist": "Oluf Bagge", "img": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Oluf_Olufsen_Bagge_-_Yggdrasil%2C_The_Mundane_Tree_1847_-_full_page.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled", "full": "https://upload.wikimedia.org/wikipedia/commons/e/e5/Oluf_Olufsen_Bagge_-_Yggdrasil%2C_The_Mundane_Tree_1847_-_full_page.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Oluf_Olufsen_Bagge_-_Yggdrasil,_The_Mundane_Tree_1847_-_full_page.jpg", "w": 857, "h": 1200}, {"id": "Bayon Face Tower", "name": "Face-Towers of the Bayon", "civ": "Khmer", "era": "12th c.", "type": "Architectural", "location": "Angkor, Cambodia", "desc": "The face-towers of the Bayon at Angkor, whose serene stone faces look out over the world-tree of the Khmer cosmos — the temple-mountain of Avalokiteshvara as a cosmic tree.", "credit": "Bayon temple, Angkor; photo © Arabsalam, CC BY-SA 3.0", "license": "CC BY-SA 3.0", "artist": "Arabsalam", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/53/Bayon_Face_Tower.JPG/960px-Bayon_Face_Tower.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/5/53/Bayon_Face_Tower.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Bayon_Face_Tower.JPG", "w": 1901, "h": 2533}, {"id": "Monreale St Agatha mosaic", "name": "St Agatha & the Tree of Life (Monreale)", "civ": "Christian (Western)", "era": "12th–13th c.", "type": "Mosaic", "location": "Monreale, Sicily", "desc": "Saint Agatha enthroned beneath a Tree of Life in the apse mosaic of the Cathedral of Monreale, the Norman-Byzantine gold ground of paradise.", "credit": "Apse mosaic, Monreale Cathedral; photo © José Luiz, CC BY-SA 4.0", "license": "CC BY-SA 4.0", "artist": "José Luiz", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1f/St_Agatha_mosaic_-_Cathedral_of_Monreale_-_Italy_2015.JPG/960px-St_Agatha_mosaic_-_Cathedral_of_Monreale_-_Italy_2015.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/1/1f/St_Agatha_mosaic_-_Cathedral_of_Monreale_-_Italy_2015.JPG?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:St_Agatha_mosaic_-_Cathedral_of_Monreale_-_Italy_2015.JPG", "w": 1164, "h": 2612}, {"id": "Monreale St Lawrence mosaic", "name": "St Lawrence & the Tree of Life (Monreale)", "civ": "Christian (Western)", "era": "12th–13th c.", "type": "Mosaic", "location": "Monreale, Sicily", "desc": "Saint Lawrence and the Tree of Life in the Monreale apse mosaic, a golden garden of paradise set in the Norman-Byzantine gold ground.", "credit": "Apse mosaic, Monreale Cathedral; public domain", "license": "Public domain", "artist": "", "img": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/39/Mosaic_of_Saint_Lawrence_from_the_Monreale_Cathedral.jpg/960px-Mosaic_of_Saint_Lawrence_from_the_Monreale_Cathedral.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail", "full": "https://upload.wikimedia.org/wikipedia/commons/3/39/Mosaic_of_Saint_Lawrence_from_the_Monreale_Cathedral.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original", "source": "https://commons.wikimedia.org/wiki/File:Mosaic_of_Saint_Lawrence_from_the_Monreale_Cathedral.jpg", "w": 1159, "h": 1600}];
+
+const civs = [...new Set(DATA.map(d=>d.civ))].sort((a,b)=>a.localeCompare(b));
+const types = [...new Set(DATA.map(d=>d.type))].sort((a,b)=>a.localeCompare(b));
+let selCiv = new Set(), selType = new Set();
+let activeId = null;
+
+function chip(label, kind, val){
+  const b = document.createElement('button');
+  b.className = 'chip'; b.textContent = label; b.dataset.kind = kind; b.dataset.val = val;
+  b.addEventListener('click', ()=>{
+    const set = kind==='civ'?selCiv:selType;
+    if (set.has(val)) set.delete(val); else set.add(val);
+    b.classList.toggle('on');
+    applyFilter();
+  });
+  return b;
+}
+function allChip(kind){
+  const b = document.createElement('button');
+  b.className='chip on'; b.textContent='All'; b.dataset.kind=kind; b.dataset.val='__all__';
+  b.addEventListener('click', ()=>{
+    const set = kind==='civ'?selCiv:selType;
+    set.clear();
+    document.querySelectorAll(`.chip[data-kind="${kind}"]`).forEach(c=>{
+      if (c.dataset.val!=='__all__') c.classList.remove('on');
+    });
+    b.classList.add('on');
+    applyFilter();
+  });
+  return b;
+}
+const civrow = document.getElementById('civrow');
+civrow.appendChild(allChip('civ'));
+civs.forEach(v=>civrow.appendChild(chip(v,'civ',v)));
+const typerow = document.getElementById('typerow');
+typerow.appendChild(allChip('type'));
+types.forEach(v=>typerow.appendChild(chip(v,'type',v)));
+const clr = document.createElement('button'); clr.id='clear'; clr.textContent='reset filters';
+clr.addEventListener('click', ()=>{ selCiv.clear(); selType.clear();
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  document.querySelectorAll('.chip[data-val="__all__"]').forEach(c=>c.classList.add('on'));
+  applyFilter();
+});
+typerow.appendChild(clr);
+
+function matches(d){
+  if (selCiv.size && !selCiv.has(d.civ)) return false;
+  if (selType.size && !selType.has(d.type)) return false;
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  if (q){
+    const hay = (d.name+' '+d.civ+' '+d.type+' '+d.location+' '+d.era+' '+d.desc).toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  return true;
+}
+
+function buildGrid(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  DATA.forEach(d=>{
+    const card = document.createElement('div');
+    card.className='card'; card.dataset.id=d.id; card.dataset.civ=d.civ; card.dataset.type=d.type;
+    const img = d.img||d.full||'';
+    card.innerHTML =
+      `<div class="img">
+         <img src="${img}" alt="${d.name}" loading="lazy" onerror="this.style.opacity=.15">
+         <span class="badge">${d.civ}</span>
+         <span class="lic">${d.license}</span>
+       </div>
+       <div class="cap">
+         <div class="name">${d.name}</div>
+         <div class="sub2">${d.type} · ${d.era}</div>
+       </div>`;
+    card.addEventListener('click', ()=>openPanel(d));
+    grid.appendChild(card);
+  });
+}
+
+function applyFilter(){
+  let shown = 0;
+  document.querySelectorAll('.card').forEach(c=>{
+    const d = DATA.find(x=>x.id===c.dataset.id);
+    const ok = matches(d);
+    c.style.display = ok ? '' : 'none';
+    if (ok) shown++;
+  });
+  const empty = document.getElementById('empty');
+  if (empty) empty.remove();
+  if (!shown){
+    const e = document.createElement('div'); e.id='empty';
+    e.innerHTML = 'No symbols match these filters.<br><button class="chip" style="margin-top:14px" onclick="document.getElementById(\'clear\').click()">reset filters</button>';
+    document.getElementById('grid').appendChild(e);
+  }
+  document.getElementById('count').textContent = `${shown} of ${DATA.length} symbols`;
+}
+
+function esc(s){ return (s||'').replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+
+function openPanel(d){
+  activeId = d.id;
+  document.querySelectorAll('.card').forEach(c=>c.classList.toggle('active', c.dataset.id===d.id));
+  document.getElementById('p-kicker').textContent = d.civ;
+  document.getElementById('p-name').textContent = d.name;
+  const meta = [['Era',d.era],['Form',d.type],['Location',d.location],['License',d.license]];
+  document.getElementById('p-meta').innerHTML =
+    meta.map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${esc(v)}</div></div>`).join('');
+  const body = document.getElementById('p-body');
+  const src = d.full||d.img||'';
+  const fig = src ? `<figure class="p-img"><img src="${src}" alt="${esc(d.name)}" onerror="this.style.display='none'"><figcaption>${esc(d.credit)}</figcaption></figure>` : '';
+  body.innerHTML = fig +
+    `<h3>Symbol</h3><p>${esc(d.desc)}</p>` +
+    `<h3>Credit</h3><div class="credit">${esc(d.credit)}</div>` +
+    (d.artist ? `<h3>Artist / Source</h3><div class="credit">${esc(d.artist)}</div>` : '') +
+    `<h3>License</h3><div class="lic-line"><span class="lic-chip">${esc(d.license)}</span></div>` +
+    (d.source ? `<h3>Reference</h3><a class="src-link" href="${esc(d.source)}" target="_blank" rel="noopener">View on Wikimedia Commons ↗</a>` : '') +
+    `<div class="footer-note">Imagery sourced from Wikimedia Commons under the license shown. ${esc(d.credit)}. Symbols compiled as a visual companion to the Tree of Life atlas.</div>`;
+  body.scrollTop = 0;
+  const p = document.getElementById('panel');
+  p.classList.add('open'); p.setAttribute('aria-hidden','false');
+}
+function closePanel(){
+  activeId = null;
+  document.querySelectorAll('.card.active').forEach(c=>c.classList.remove('active'));
+  const p = document.getElementById('panel');
+  p.classList.remove('open'); p.setAttribute('aria-hidden','true');
+}
+document.getElementById('search').addEventListener('input', applyFilter);
+document.getElementById('close').addEventListener('click', closePanel);
+document.addEventListener('keydown', e=>{ if (e.key==='Escape') closePanel(); });
+document.getElementById('main').addEventListener('scroll', ()=>{});
+
+buildGrid();
+applyFilter();
+</script>
+</body>
+</html>
